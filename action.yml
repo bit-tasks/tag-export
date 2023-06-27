@@ -1,0 +1,10 @@
+name: 'Bit Tag and Export'
+description: 'Persist Bit Soft Tags and Export to Remote Scope'
+inputs:
+  ws-dir:
+    description: "Workspace json file directory path"
+    required: false
+    default: './'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

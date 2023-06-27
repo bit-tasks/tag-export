@@ -1,0 +1,27 @@
+name: Test Bit Init
+on:
+  workflow_dispatch:
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Initialize Bit
+        uses: bit-tasks/init@v1
+      - name: Soft tag components
+        run: cd testws && bit tag -m "my message" --soft
+      - name: Creating a bare scope
+        run: mkdir bare-scope && cd bare-scope && bit init --bare
+      - name: Start the server and test
+        run: cd bare-scope && bit start --port 4000 --no-browser & sleep 120 && curl http://localhost:4000 
+      - name: Add remote scope
+        run: cd testws && bit remote add http://localhost:4000       
+      - name: Bit Tag and Export
+        uses: bit-tasks/tag-export@main
+        with:
+          ws-dir: 'testws'
