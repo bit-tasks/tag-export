@@ -13,6 +13,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Initialize Bit
         uses: bit-tasks/init@v1
+        with:
+            ws-dir: 'testws'
       - name: Soft tag components
         run: cd testws && bit tag -m "my message" --soft
       - name: Creating a bare scope
