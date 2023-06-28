@@ -9,7 +9,7 @@ This CD Task, executs `bit tag --persist and bit export` inside the workspace di
 
 ### `ws-dir`
 
-**Optional** The workspace directory path from the root. Default `"Value From Init Task Step"`.
+**Optional** The workspace directory path from the root. Default `"Dir specified in Init Task or ./"`.
 
 ## Example usage
 
