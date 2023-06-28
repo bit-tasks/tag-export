@@ -3971,7 +3971,6 @@ const exec_1 = __nccwpck_require__(514);
 const tag_export_1 = __importDefault(__nccwpck_require__(905));
 try {
     const wsDir = core.getInput("ws-dir") || process.env.WSDIR || "./";
-    console.log(wsDir);
     const stdExec = (command, options) => (0, exec_1.exec)(command, [], options);
     (0, tag_export_1.default)(stdExec, wsDir);
 }
@@ -3998,8 +3997,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const run = (exec, wsdir) => __awaiter(void 0, void 0, void 0, function* () {
-    yield exec('bit tag --persist', { cwd: './test-data' });
-    yield exec('bit export', { cwd: './test-data' });
+    yield exec('bit tag --persist', { cwd: 'test-data' });
+    yield exec('bit export', { cwd: 'test-data' });
 });
 exports["default"] = run;
 

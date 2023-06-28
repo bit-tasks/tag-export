@@ -4,7 +4,6 @@ import run, { ExecFunction } from "./scripts/tag-export";
 
 try {
   const wsDir: string = core.getInput("ws-dir") || process.env.WSDIR || "./";
-  console.log(wsDir);
   const stdExec: ExecFunction = (command: string, options?: {cwd: string}): Promise<number> => exec(command, [], options);
   run(stdExec, wsDir);
 } catch (error) {
