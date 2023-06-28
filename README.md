@@ -13,6 +13,8 @@ This CD Task, executs `bit tag --persist and bit export` inside the workspace di
 
 ## Example usage
 
+Define the `bit-tasks/init@v1` action in your pipeline before using the Tag and Export.
+
 ```yaml
 name: Test Bit Tag and Export
 on:
@@ -20,6 +22,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      BIT_TOKEN: ${{ secrets.BIT_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
