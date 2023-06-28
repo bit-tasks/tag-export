@@ -3971,6 +3971,7 @@ const exec_1 = __nccwpck_require__(514);
 const tag_export_1 = __importDefault(__nccwpck_require__(905));
 try {
     const wsDir = core.getInput("ws-dir") || process.env.WSDIR || "./";
+    console.log(wsDir);
     const stdExec = (command, options) => (0, exec_1.exec)(command, [], options);
     (0, tag_export_1.default)(stdExec, wsDir);
 }
