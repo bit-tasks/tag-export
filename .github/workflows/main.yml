@@ -1,4 +1,4 @@
-name: Test Bit Tag and Export
+name: Test Action
 on:
   workflow_dispatch:
 jobs:
