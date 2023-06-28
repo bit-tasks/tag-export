@@ -12,7 +12,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Initialize Bit
-        uses: bit-tasks/init@v1
+        uses: bit-tasks/init@main
         with:
             ws-dir: 'test-data'
       - name: Soft tag components
