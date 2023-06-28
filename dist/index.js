@@ -3934,10 +3934,18 @@ exports["default"] = _default;
 
 /***/ }),
 
-/***/ 561:
-/***/ ((module) => {
+/***/ 75:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-module.exports = eval("require")("./scripts/init");
+const fs = __nccwpck_require__(147);
+const path = __nccwpck_require__(17);
+
+async function run(exec, wsdir) {
+  await exec('bit tag --persist', [], { cwd: wsdir });
+  await exec('bit export', [], { cwd: wsdir });
+}
+
+module.exports = run;
 
 
 /***/ }),
@@ -4097,7 +4105,7 @@ var __webpack_exports__ = {};
 (() => {
 const core = __nccwpck_require__(186);
 const exec = (__nccwpck_require__(514).exec);
-const run = __nccwpck_require__(561);
+const run = __nccwpck_require__(75);
 
 try {
   const wsDir = core.getInput("ws-dir") || process.env.WSDIR;

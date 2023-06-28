@@ -20,7 +20,7 @@ jobs:
       - name: Creating a bare scope
         run: mkdir bare-scope && cd bare-scope && bit init --bare
       - name: Start the server and test
-        run: cd bare-scope && bit start --port 4000 --no-browser & sleep 150 && curl http://localhost:4000 
+        run: cd bare-scope && bit start --port 4000 --no-browser & sleep 120 && curl http://localhost:4000 
       - name: Add remote scope
         run: cd test-data && bit remote add http://localhost:4000       
       - name: Bit Tag and Export
