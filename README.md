@@ -3,7 +3,7 @@ Persist Bit Soft Tags and Export to Remote Scope
 
 # GitHub Actions
 
-This CD Task, executs `bit tag --persist and bit export` inside the workspace directory.
+This CD Task, executs `bit tag --persist && bit export` inside the workspace directory.
 
 ## Inputs
 
