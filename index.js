@@ -4,7 +4,10 @@ const run = require("./scripts/tag-export");
 
 try {
   const wsDir = core.getInput("ws-dir") || process.env.WSDIR;
-  run(exec, wsDir);
+  const stdExec = (command, cwd) => {
+    return exec(command, [], cwd);
+  };
+  run(stdExec, wsDir);
 } catch (error) {
   core.setFailed(error.message);
 }
