@@ -25,3 +25,5 @@ jobs:
         run: cd test-data && bit remote add http://localhost:4000       
       - name: Bit Tag and Export
         uses: bit-tasks/tag-export@main
+        with:
+          ws-dir: 'test-data'
