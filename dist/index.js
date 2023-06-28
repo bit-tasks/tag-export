@@ -3972,7 +3972,7 @@ const tag_export_1 = __importDefault(__nccwpck_require__(905));
 try {
     const wsDir = core.getInput("ws-dir") || process.env.WSDIR || "./";
     const stdExec = (command, options) => (0, exec_1.exec)(command, [], options);
-    (0, tag_export_1.default)(stdExec, wsDir.replace(/^["']|["']$/g, ''));
+    (0, tag_export_1.default)(stdExec, wsDir);
 }
 catch (error) {
     core.setFailed(error.message);
