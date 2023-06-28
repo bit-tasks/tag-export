@@ -4,7 +4,6 @@ inputs:
   ws-dir:
     description: "Workspace json file directory path"
     required: false
-    default: './'
 runs:
   using: 'node16'
   main: 'dist/index.js'

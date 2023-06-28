@@ -26,11 +26,9 @@ jobs:
       - name: Initialize Bit
         uses: bit-tasks/init@v1
         with:
-          ws-dir: '<workspace-directory-path>'
+          ws-dir: '<WORKSPACE_DIR_PATH>'
       - name: Bit Tag and Export
         uses: bit-tasks/tag-export@v1
-        with:
-          ws-dir: '<workspace-directory-path>'
 ```
 
 # Contributor Guide
