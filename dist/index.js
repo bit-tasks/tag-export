@@ -3941,8 +3941,8 @@ const fs = __nccwpck_require__(147);
 const path = __nccwpck_require__(17);
 
 async function run(exec, wsdir) {
-  await exec('bit tag --persist', [], { cwd: wsdir });
-  await exec('bit export', [], { cwd: wsdir });
+  await exec('bit tag --persist', { cwd: wsdir });
+  await exec('bit export', { cwd: wsdir });
 }
 
 module.exports = run;
@@ -4109,7 +4109,10 @@ const run = __nccwpck_require__(75);
 
 try {
   const wsDir = core.getInput("ws-dir") || process.env.WSDIR;
-  run(exec, wsDir);
+  const stdExec = (command, cwd) => {
+    return exec(command, [], cwd);
+  };
+  run(stdExec, wsDir);
 } catch (error) {
   core.setFailed(error.message);
 }
