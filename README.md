@@ -9,7 +9,7 @@ This CD Task, executs `bit tag --persist and bit export` inside the workspace di
 
 ### `ws-dir`
 
-**Optional** The workspace directory path from the root. Default `"./"`.
+**Optional** The workspace directory path from the root. Default `"Value From Init Task Step"`.
 
 ## Example usage
 
@@ -42,11 +42,10 @@ Steps to create custom tasks in different CI/CD platforms.
 Go to the GithHub action task directory and build using NCC compiler. For example;
 
 ```
-npm i -g @vercel/ncc
 npm install
-ncc build index.js --license licenses.txt
+npm run build
 git commit -m "Update task"
-git tag -a -m "action release" v1
+git tag -a -m "action release" v1 --force
 git push --follow-tags
 ```
 

@@ -14,16 +14,14 @@ jobs:
       - name: Initialize Bit
         uses: bit-tasks/init@v1
         with:
-            ws-dir: 'testws'
+            ws-dir: 'test-data'
       - name: Soft tag components
-        run: cd testws && bit tag -m "my message" --soft
+        run: cd test-data && bit tag -m "my message" --soft
       - name: Creating a bare scope
         run: mkdir bare-scope && cd bare-scope && bit init --bare
       - name: Start the server and test
         run: cd bare-scope && bit start --port 4000 --no-browser & sleep 120 && curl http://localhost:4000 
       - name: Add remote scope
-        run: cd testws && bit remote add http://localhost:4000       
+        run: cd test-data && bit remote add http://localhost:4000       
       - name: Bit Tag and Export
         uses: bit-tasks/tag-export@main
-        with:
-          ws-dir: 'testws'
