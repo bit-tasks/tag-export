@@ -1,4 +1,4 @@
 node_modules
 .bit
-test-data/.DS_Store
+test-data
 .DS_Store

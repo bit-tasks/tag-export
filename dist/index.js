@@ -3997,7 +3997,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const run = (exec, wsdir) => __awaiter(void 0, void 0, void 0, function* () {
-    yield exec('bit tag --persist', { cwd: wsdir });
+    yield exec('bit tag -m "CI', { cwd: wsdir });
     yield exec('bit export', { cwd: wsdir });
 });
 exports["default"] = run;
