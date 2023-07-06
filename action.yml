@@ -1,5 +1,8 @@
 name: 'Bit Tag and Export'
 description: 'Persist Bit Soft Tags and Export to Remote Scope'
+branding: 
+  icon: 'upload-cloud'
+  color: 'purple'
 inputs:
   ws-dir:
     description: "Workspace json file directory path"
