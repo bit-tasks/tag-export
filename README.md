@@ -23,7 +23,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
-      BIT_TOKEN: ${{ secrets.BIT_TOKEN }}
+      BIT_CONFIG_USER_TOKEN: ${{ secrets.BIT_CONFIG_USER_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
