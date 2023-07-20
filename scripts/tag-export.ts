@@ -1,9 +1,9 @@
 
-export type ExecFunction = (command: string, options?: {cwd: string}) => Promise<number>;
+import { exec } from "@actions/exec";
 
-const run: (exec: ExecFunction, wsdir: string) => Promise<void> = async (exec, wsdir) => {
-  await exec('bit tag -m "CI', { cwd: wsdir });
-  await exec('bit export', { cwd: wsdir });
+const run = async (wsdir: string) => {
+  await exec('bit tag -m "CI"', [], { cwd: wsdir });
+  await exec('bit export', [], { cwd: wsdir });
 }
 
 export default run;

@@ -13,7 +13,7 @@ This CD Task, executs `bit tag -m "CI" && bit export` inside the workspace direc
 
 ## Example usage
 
-Define the `bit-tasks/init@v1` action in your pipeline before using the Tag and Export.
+**Note:** Use `bit-task/init@v1` as a prior step in your action before running Bit Verify.
 
 ```yaml
 name: Test Bit Tag and Export

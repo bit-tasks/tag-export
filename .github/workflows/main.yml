@@ -1,4 +1,4 @@
-name: Test Action
+name: Test Tag and Export
 on:
   workflow_dispatch:
 jobs:
@@ -7,10 +7,6 @@ jobs:
     env:
       BIT_TOKEN: ${{ secrets.BIT_TOKEN }}
     steps:
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Initialize Bit
