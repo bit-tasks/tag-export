@@ -3,7 +3,7 @@ Persist Bit Soft Tags and Export to Remote Scope
 
 # GitHub Actions
 
-This CD Task, executs `bit tag -m "CI" && bit export` inside the workspace directory.
+This task executes `bit tag -m "CI" && bit export` inside the workspace directory.
 
 ## Inputs
 
@@ -51,4 +51,4 @@ git tag -a -m "action release" v1 --force
 git push --follow-tags
 ```
 
-For more information refer [Create a javascript action](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action)
+For more information, refer to [Create a javascript action](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action)
