@@ -13,7 +13,7 @@ This task executes `bit tag -m "CI" && bit export` inside the workspace director
 
 ## Example usage
 
-**Note:** Use `bit-task/init@v1` as a prior step in your action before running Bit Verify.
+**Note:** Use `bit-task/init@v1` as a prior step in your action before running Bit Tag and Export.
 
 ```yaml
 name: Test Bit Tag and Export
