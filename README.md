@@ -13,7 +13,7 @@ This task executes `bit tag -m "CI" && bit export` inside the workspace director
 
 ## Example usage
 
-**Note:** Use `bit-task/init@v1` as a prior step in your action before running Bit Tag and Export.
+**Note:** Use `bit-task/init@v1` as a prior step in your action before running `bit-tasks/tag-export@v1`.
 
 ```yaml
 name: Test Bit Tag and Export
@@ -23,6 +23,9 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+      GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       BIT_CONFIG_USER_TOKEN: ${{ secrets.BIT_CONFIG_USER_TOKEN }}
     steps:
       - name: Checkout repository
