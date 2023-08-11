@@ -1,5 +1,4 @@
 import { exec } from "@actions/exec";
-import * as core from "@actions/core";
 import * as github from "@actions/github";
 
 function getVersionFromText(message: string): {
@@ -17,6 +16,7 @@ function getVersionFromText(message: string): {
     patch: match.groups.patch,
   };
 }
+
 async function fetchVersionFromLatestCommitPR(): Promise<{
   major?: string;
   minor?: string;
