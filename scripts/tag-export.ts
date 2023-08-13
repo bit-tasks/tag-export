@@ -6,7 +6,7 @@ function getVersionFromText(message: string): {
   [key: string]: string | undefined;
 } {
   const match =
-    /\[version:(?<major>\d+)?\.(?<minor>\d+)?\.(?<patch>\d+)?\]/.exec(message);
+    /\[(?<major>\d+)?\.(?<minor>\d+)?\.(?<patch>\d+)?\]/.exec(message);
   if (!match || !match.groups) {
     return {};
   }
@@ -49,7 +49,7 @@ async function fetchVersionFromLatestCommitPR(): Promise<{
 
   // Extract the PR number from the commit message
   const prNumberMatch = /Merge pull request #(\d+)/.exec(commitMessage);
-  
+
   if (prNumberMatch) {
     const prNumber = prNumberMatch[1];
     core.info("PR Number: " + prNumber);
