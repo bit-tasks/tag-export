@@ -10931,6 +10931,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const exec_1 = __nccwpck_require__(1514);
 const github = __importStar(__nccwpck_require__(5438));
+const core = __importStar(__nccwpck_require__(2186));
 function getVersionFromText(message) {
     const match = /\[version:(?<major>\d+)?\.(?<minor>\d+)?\.(?<patch>\d+)?\]/.exec(message);
     if (!match || !match.groups) {
@@ -10943,31 +10944,36 @@ function getVersionFromText(message) {
     };
 }
 function fetchVersionFromLatestCommitPR() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const githubToken = process.env.GITHUB_TOKEN;
         if (!githubToken) {
             throw new Error("GitHub token not found");
         }
         const octokit = github.getOctokit(githubToken);
-        const { repo, sha } = github.context.payload;
-        if (!repo || !sha) {
-            console.log("Repo information or commit SHA is not available.");
+        const { repo, ref } = github.context;
+        const branch = ref.replace('refs/heads/', ''); // Extract the branch name from the ref.
+        // Fetch the latest commit of the branch
+        const { data: commit } = yield octokit.rest.repos.getCommit({
+            owner: repo.owner,
+            repo: repo.repo,
+            ref: branch
+        });
+        const commitMessage = (_a = commit === null || commit === void 0 ? void 0 : commit.commit) === null || _a === void 0 ? void 0 : _a.message;
+        core.info("Commit Message: " + commitMessage);
+        if (!repo || !commitMessage) {
+            core.info("Repo information or commit message is not available.");
             return {};
         }
-        // Fetch the commit to get its message
-        const { data: commit } = yield octokit.rest.git.getCommit({
-            owner: repo.owner.login,
-            repo: repo.name,
-            commit_sha: sha,
-        });
         // Extract the PR number from the commit message
-        const prNumberMatch = /Merge pull request #(\d+)/.exec(commit.message);
+        const prNumberMatch = /Merge pull request #(\d+)/.exec(commitMessage);
         if (prNumberMatch) {
             const prNumber = prNumberMatch[1];
+            core.info("PR Number: " + prNumber);
             // Fetch labels of the PR using the extracted number
-            const { data: { labels }, } = yield octokit.rest.pulls.get({
-                owner: repo.owner.login,
-                repo: repo.name,
+            const { data: { labels } } = yield octokit.rest.pulls.get({
+                owner: repo.owner,
+                repo: repo.repo,
                 pull_number: parseInt(prNumber, 10),
             });
             for (const labelObj of labels) {
@@ -10978,7 +10984,7 @@ function fetchVersionFromLatestCommitPR() {
             }
         }
         // Fallback: Check the commit message if no valid version label was found
-        const commitVersionData = getVersionFromText(commit.message);
+        const commitVersionData = getVersionFromText(commitMessage);
         if (commitVersionData.major ||
             commitVersionData.minor ||
             commitVersionData.patch) {
