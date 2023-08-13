@@ -49,6 +49,7 @@ async function fetchVersionFromLatestCommitPR(): Promise<{
 
   // Extract the PR number from the commit message
   const prNumberMatch = /Merge pull request #(\d+)/.exec(commitMessage);
+  
   if (prNumberMatch) {
     const prNumber = prNumberMatch[1];
     core.info("PR Number: " + prNumber);
