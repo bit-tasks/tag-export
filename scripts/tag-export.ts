@@ -1,5 +1,6 @@
 import { exec } from "@actions/exec";
 import * as github from "@actions/github";
+import * as core from "@actions/core";
 
 function getVersionFromText(message: string): {
   [key: string]: string | undefined;
@@ -27,33 +28,36 @@ async function fetchVersionFromLatestCommitPR(): Promise<{
     throw new Error("GitHub token not found");
   }
   const octokit = github.getOctokit(githubToken);
-  const { repo, sha } = github.context.payload;
+    
+  const { repo, ref } = github.context;
+  const branch = ref.replace('refs/heads/', '');  // Extract the branch name from the ref.
 
-  if (!repo || !sha) {
-    console.log("Repo information or commit SHA is not available.");
+  // Fetch the latest commit of the branch
+  const { data: commit } = await octokit.rest.repos.getCommit({
+      owner: repo.owner,
+      repo: repo.repo,
+      ref: branch
+  });
+
+  const commitMessage = commit?.commit?.message;
+  core.info("Commit Message: " + commitMessage);
+
+  if (!repo || !commitMessage) {
+    core.info("Repo information or commit message is not available.");
     return {};
   }
 
-  // Fetch the commit to get its message
-  const { data: commit } = await octokit.rest.git.getCommit({
-    owner: repo.owner.login,
-    repo: repo.name,
-    commit_sha: sha,
-  });
-
   // Extract the PR number from the commit message
-  const prNumberMatch = /Merge pull request #(\d+)/.exec(commit.message);
+  const prNumberMatch = /Merge pull request #(\d+)/.exec(commitMessage);
   if (prNumberMatch) {
     const prNumber = prNumberMatch[1];
-
+    core.info("PR Number: " + prNumber);
     // Fetch labels of the PR using the extracted number
-    const {
-      data: { labels },
-    } = await octokit.rest.pulls.get({
-      owner: repo.owner.login,
-      repo: repo.name,
+    const { data: { labels } } = await octokit.rest.pulls.get({
+      owner: repo.owner,
+      repo: repo.repo,
       pull_number: parseInt(prNumber, 10),
-    });
+  });
 
     for (const labelObj of labels) {
       const versionData = getVersionFromText(labelObj.name);
@@ -64,7 +68,7 @@ async function fetchVersionFromLatestCommitPR(): Promise<{
   }
 
   // Fallback: Check the commit message if no valid version label was found
-  const commitVersionData = getVersionFromText(commit.message);
+  const commitVersionData = getVersionFromText(commitMessage);
   if (
     commitVersionData.major ||
     commitVersionData.minor ||
