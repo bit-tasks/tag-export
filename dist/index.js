@@ -10932,10 +10932,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const exec_1 = __nccwpck_require__(1514);
 const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
-function getVersionKeyword(text, mode) {
+function getVersionKeyword(text) {
     const keywords = ["patch", "major", "minor", "pre-release"];
-    return keywords.find(keyword => (mode === "spaces" && text.includes(` ${keyword} `)) ||
-        (mode === "brackets" && text.includes(`[${keyword}]`))) || null;
+    return (keywords.find((keyword) => text.includes(` ${keyword} `) || text.includes(`[${keyword}]`)) || null);
 }
 function fetchVersionFromLatestCommitPR() {
     var _a;
@@ -10962,18 +10961,26 @@ function fetchVersionFromLatestCommitPR() {
         if (prNumberMatch) {
             const prNumber = prNumberMatch[1];
             core.info("PR Number: " + prNumber);
-            const { data: { labels } } = yield octokit.rest.pulls.get({
+            const { data: { title, labels }, } = yield octokit.rest.pulls.get({
                 owner: repo.owner,
                 repo: repo.repo,
                 pull_number: parseInt(prNumber, 10),
             });
-            const labelVersion = labels.map(label => getVersionKeyword(label.name, "spaces")).find(v => v);
+            // 1. Check PR Labels
+            const labelVersion = labels
+                .map((label) => getVersionKeyword(label.name))
+                .find((v) => v);
             if (labelVersion) {
                 return labelVersion;
             }
+            // 2. Fallback to PR title
+            const prTitleVersion = getVersionKeyword(title);
+            if (prTitleVersion) {
+                return prTitleVersion;
+            }
         }
-        // Fallback: Check the commit message if no valid version label was found
-        return getVersionKeyword(commitMessage, "brackets");
+        // 3. Last Fallback: Check the commit message
+        return getVersionKeyword(commitMessage);
     });
 }
 const run = (wsdir) => __awaiter(void 0, void 0, void 0, function* () {

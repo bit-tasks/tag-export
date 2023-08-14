@@ -2,15 +2,15 @@ import { exec } from "@actions/exec";
 import * as github from "@actions/github";
 import * as core from "@actions/core";
 
-type CheckMode = "brackets" | "spaces";
-
-function getVersionKeyword(text: string, mode: CheckMode): string | null {
+function getVersionKeyword(text: string): string | null {
   const keywords = ["patch", "major", "minor", "pre-release"];
-  
-  return keywords.find(keyword => 
-    (mode === "spaces" && text.includes(` ${keyword} `)) ||
-    (mode === "brackets" && text.includes(`[${keyword}]`))
-  ) || null;
+
+  return (
+    keywords.find(
+      (keyword) =>
+        text.includes(` ${keyword} `) || text.includes(`[${keyword}]`)
+    ) || null
+  );
 }
 
 async function fetchVersionFromLatestCommitPR(): Promise<string | null> {
@@ -41,26 +41,37 @@ async function fetchVersionFromLatestCommitPR(): Promise<string | null> {
   if (prNumberMatch) {
     const prNumber = prNumberMatch[1];
     core.info("PR Number: " + prNumber);
-    const { data: { labels } } = await octokit.rest.pulls.get({
+    const {
+      data: { title, labels },
+    } = await octokit.rest.pulls.get({
       owner: repo.owner,
       repo: repo.repo,
       pull_number: parseInt(prNumber, 10),
     });
-    
-    const labelVersion = labels.map(label => getVersionKeyword(label.name, "spaces")).find(v => v);
+
+    // 1. Check PR Labels
+    const labelVersion = labels
+      .map((label) => getVersionKeyword(label.name))
+      .find((v) => v);
     if (labelVersion) {
       return labelVersion;
     }
+
+    // 2. Fallback to PR title
+    const prTitleVersion = getVersionKeyword(title);
+    if (prTitleVersion) {
+      return prTitleVersion;
+    }
   }
 
-  // Fallback: Check the commit message if no valid version label was found
-  return getVersionKeyword(commitMessage, "brackets");
+   // 3. Last Fallback: Check the commit message
+  return getVersionKeyword(commitMessage);
 }
 
 const run = async (wsdir: string) => {
   const version = await fetchVersionFromLatestCommitPR();
   let command = 'bit tag -m "CI"';
-  
+
   if (version) {
     command += ` --${version}`;
   }
