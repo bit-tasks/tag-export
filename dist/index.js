@@ -10932,16 +10932,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const exec_1 = __nccwpck_require__(1514);
 const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
-function getVersionFromText(message) {
-    const match = /(?<major>\d+)?\.(?<minor>\d+)?\.(?<patch>\d+)?/.exec(message);
-    if (!match || !match.groups) {
-        return {};
-    }
-    return {
-        major: match.groups.major,
-        minor: match.groups.minor,
-        patch: match.groups.patch,
-    };
+function getVersionKeyword(text, mode) {
+    const keywords = ["patch", "major", "minor", "pre-release"];
+    return keywords.find(keyword => (mode === "spaces" && text.includes(` ${keyword} `)) ||
+        (mode === "brackets" && text.includes(`[${keyword}]`))) || null;
 }
 function fetchVersionFromLatestCommitPR() {
     var _a;
@@ -10952,59 +10946,41 @@ function fetchVersionFromLatestCommitPR() {
         }
         const octokit = github.getOctokit(githubToken);
         const { repo, ref } = github.context;
-        const branch = ref.replace('refs/heads/', ''); // Extract the branch name from the ref.
-        // Fetch the latest commit of the branch
+        const branch = ref.replace("refs/heads/", "");
         const { data: commit } = yield octokit.rest.repos.getCommit({
             owner: repo.owner,
             repo: repo.repo,
-            ref: branch
+            ref: branch,
         });
         const commitMessage = (_a = commit === null || commit === void 0 ? void 0 : commit.commit) === null || _a === void 0 ? void 0 : _a.message;
         core.info("Commit Message: " + commitMessage);
         if (!repo || !commitMessage) {
             core.info("Repo information or commit message is not available.");
-            return {};
+            return null;
         }
-        // Extract the PR number from the commit message
         const prNumberMatch = /Merge pull request #(\d+)/.exec(commitMessage);
         if (prNumberMatch) {
             const prNumber = prNumberMatch[1];
             core.info("PR Number: " + prNumber);
-            // Fetch labels of the PR using the extracted number
             const { data: { labels } } = yield octokit.rest.pulls.get({
                 owner: repo.owner,
                 repo: repo.repo,
                 pull_number: parseInt(prNumber, 10),
             });
-            for (const labelObj of labels) {
-                const versionData = getVersionFromText(labelObj.name);
-                if (versionData.major || versionData.minor || versionData.patch) {
-                    return versionData; // Return the first version label found
-                }
+            const labelVersion = labels.map(label => getVersionKeyword(label.name, "spaces")).find(v => v);
+            if (labelVersion) {
+                return labelVersion;
             }
         }
         // Fallback: Check the commit message if no valid version label was found
-        const commitVersionData = getVersionFromText(commitMessage);
-        if (commitVersionData.major ||
-            commitVersionData.minor ||
-            commitVersionData.patch) {
-            return commitVersionData; // Return version data from commit message
-        }
-        return {}; // No version info found in both PR labels and commit message
+        return getVersionKeyword(commitMessage, "brackets");
     });
 }
 const run = (wsdir) => __awaiter(void 0, void 0, void 0, function* () {
-    const versionData = yield fetchVersionFromLatestCommitPR();
+    const version = yield fetchVersionFromLatestCommitPR();
     let command = 'bit tag -m "CI"';
-    // Append version details if they exist
-    if (versionData.major) {
-        command += ` --major ${versionData.major}`;
-    }
-    if (versionData.minor) {
-        command += ` --minor ${versionData.minor}`;
-    }
-    if (versionData.patch) {
-        command += ` --patch ${versionData.patch}`;
+    if (version) {
+        command += ` --${version}`;
     }
     yield (0, exec_1.exec)(command, [], { cwd: wsdir });
     yield (0, exec_1.exec)("bit export", [], { cwd: wsdir });

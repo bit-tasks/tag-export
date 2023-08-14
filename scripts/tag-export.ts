@@ -2,41 +2,31 @@ import { exec } from "@actions/exec";
 import * as github from "@actions/github";
 import * as core from "@actions/core";
 
-function getVersionFromText(message: string): {
-  [key: string]: string | undefined;
-} {
-  const match =
-    /(?<major>\d+)?\.(?<minor>\d+)?\.(?<patch>\d+)?/.exec(message);
-  if (!match || !match.groups) {
-    return {};
-  }
+type CheckMode = "brackets" | "spaces";
 
-  return {
-    major: match.groups.major,
-    minor: match.groups.minor,
-    patch: match.groups.patch,
-  };
+function getVersionKeyword(text: string, mode: CheckMode): string | null {
+  const keywords = ["patch", "major", "minor", "pre-release"];
+  
+  return keywords.find(keyword => 
+    (mode === "spaces" && text.includes(` ${keyword} `)) ||
+    (mode === "brackets" && text.includes(`[${keyword}]`))
+  ) || null;
 }
 
-async function fetchVersionFromLatestCommitPR(): Promise<{
-  major?: string;
-  minor?: string;
-  patch?: string;
-}> {
+async function fetchVersionFromLatestCommitPR(): Promise<string | null> {
   const githubToken = process.env.GITHUB_TOKEN;
   if (!githubToken) {
     throw new Error("GitHub token not found");
   }
   const octokit = github.getOctokit(githubToken);
-    
-  const { repo, ref } = github.context;
-  const branch = ref.replace('refs/heads/', '');  // Extract the branch name from the ref.
 
-  // Fetch the latest commit of the branch
+  const { repo, ref } = github.context;
+  const branch = ref.replace("refs/heads/", "");
+
   const { data: commit } = await octokit.rest.repos.getCommit({
-      owner: repo.owner,
-      repo: repo.repo,
-      ref: branch
+    owner: repo.owner,
+    repo: repo.repo,
+    ref: branch,
   });
 
   const commitMessage = commit?.commit?.message;
@@ -44,57 +34,35 @@ async function fetchVersionFromLatestCommitPR(): Promise<{
 
   if (!repo || !commitMessage) {
     core.info("Repo information or commit message is not available.");
-    return {};
+    return null;
   }
 
-  // Extract the PR number from the commit message
   const prNumberMatch = /Merge pull request #(\d+)/.exec(commitMessage);
-
   if (prNumberMatch) {
     const prNumber = prNumberMatch[1];
     core.info("PR Number: " + prNumber);
-    // Fetch labels of the PR using the extracted number
     const { data: { labels } } = await octokit.rest.pulls.get({
       owner: repo.owner,
       repo: repo.repo,
       pull_number: parseInt(prNumber, 10),
-  });
-
-    for (const labelObj of labels) {
-      const versionData = getVersionFromText(labelObj.name);
-      if (versionData.major || versionData.minor || versionData.patch) {
-        return versionData; // Return the first version label found
-      }
+    });
+    
+    const labelVersion = labels.map(label => getVersionKeyword(label.name, "spaces")).find(v => v);
+    if (labelVersion) {
+      return labelVersion;
     }
   }
 
   // Fallback: Check the commit message if no valid version label was found
-  const commitVersionData = getVersionFromText(commitMessage);
-  if (
-    commitVersionData.major ||
-    commitVersionData.minor ||
-    commitVersionData.patch
-  ) {
-    return commitVersionData; // Return version data from commit message
-  }
-
-  return {}; // No version info found in both PR labels and commit message
+  return getVersionKeyword(commitMessage, "brackets");
 }
 
 const run = async (wsdir: string) => {
-  const versionData = await fetchVersionFromLatestCommitPR();
-
+  const version = await fetchVersionFromLatestCommitPR();
   let command = 'bit tag -m "CI"';
-
-  // Append version details if they exist
-  if (versionData.major) {
-    command += ` --major ${versionData.major}`;
-  }
-  if (versionData.minor) {
-    command += ` --minor ${versionData.minor}`;
-  }
-  if (versionData.patch) {
-    command += ` --patch ${versionData.patch}`;
+  
+  if (version) {
+    command += ` --${version}`;
   }
 
   await exec(command, [], { cwd: wsdir });
