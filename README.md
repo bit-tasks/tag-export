@@ -13,15 +13,21 @@ This task executes `bit tag -m "CI" && bit export` inside the workspace director
 
 ## Tag version
 
-There are three methods to specify the version tag for your components, prioritized in the order listed below:
+Specify the version tag for your components using the following methods. You can use any of these version keywords: major, minor, patch, and pre-release. You can present these keywords either as standalone surrounded by spaces like major or enclosed within square brackets such as [major].
 
-1. **Pull Request Label:** Attach a label containing the desired version keyword to your Pull Request.
-2. **Pull Request Title:** Include the version keyword directly within the Pull Request's title.
-3. **Git Commit Title:** Specify the version within the title of the Git commit message.
+### Through `Pull Requests`
 
-Accepted version keywords are: `major`, `minor`, `patch`, and `pre-release`.
+**Label:** Attach a label with the desired version keyword to your Pull Request.
 
-These can be presented either surrounded by spaces (e.g., `major`) or enclosed in square brackets (e.g., `[major]`).
+**Title:** Alternatively, you can include the version keyword in the Pull Request title. If the keyword is present in both the label and title, the label takes precedence.
+
+**Note:** Once a Pull Request is merged, it's identified by tracking its associated commit (most recent) in the target branch.
+
+### Directly via `Git Push`
+
+Incorporate the version keyword in the title of your Git commit message.
+
+**Note:** The version based on the latest commit title.
 
 ## Example usage
 
