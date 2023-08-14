@@ -8,7 +8,9 @@ function getVersionKeyword(text: string): string | null {
   return (
     keywords.find(
       (keyword) =>
-        text.includes(` ${keyword} `) || text.includes(`[${keyword}]`)
+        text.includes(` ${keyword} `) ||
+        text.endsWith(` ${keyword}`) ||
+        text.includes(`[${keyword}]`)
     ) || null
   );
 }
@@ -64,7 +66,7 @@ async function fetchVersionFromLatestCommitPR(): Promise<string | null> {
     }
   }
 
-   // 3. Last Fallback: Check the commit message
+  // 3. Last Fallback: Check the commit message
   return getVersionKeyword(commitMessage);
 }
 

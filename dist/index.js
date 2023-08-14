@@ -10934,7 +10934,9 @@ const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
 function getVersionKeyword(text) {
     const keywords = ["patch", "major", "minor", "pre-release"];
-    return (keywords.find((keyword) => text.includes(` ${keyword} `) || text.includes(`[${keyword}]`)) || null);
+    return (keywords.find((keyword) => text.includes(` ${keyword} `) ||
+        text.endsWith(` ${keyword}`) ||
+        text.includes(`[${keyword}]`)) || null);
 }
 function fetchVersionFromLatestCommitPR() {
     var _a;
