@@ -10998,13 +10998,13 @@ const run = (wsdir) => __awaiter(void 0, void 0, void 0, function* () {
     let command = 'bit tag -m "CI"';
     // Append version details if they exist
     if (versionData.major) {
-        command += ` --major v${versionData.major}`;
+        command += ` --major ${versionData.major}`;
     }
     if (versionData.minor) {
-        command += ` --minor v${versionData.minor}`;
+        command += ` --minor ${versionData.minor}`;
     }
     if (versionData.patch) {
-        command += ` --patch v${versionData.patch}`;
+        command += ` --patch ${versionData.patch}`;
     }
     yield (0, exec_1.exec)(command, [], { cwd: wsdir });
     yield (0, exec_1.exec)("bit export", [], { cwd: wsdir });

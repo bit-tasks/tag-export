@@ -88,13 +88,13 @@ const run = async (wsdir: string) => {
 
   // Append version details if they exist
   if (versionData.major) {
-    command += ` --major v${versionData.major}`;
+    command += ` --major ${versionData.major}`;
   }
   if (versionData.minor) {
-    command += ` --minor v${versionData.minor}`;
+    command += ` --minor ${versionData.minor}`;
   }
   if (versionData.patch) {
-    command += ` --patch v${versionData.patch}`;
+    command += ` --patch ${versionData.patch}`;
   }
 
   await exec(command, [], { cwd: wsdir });
