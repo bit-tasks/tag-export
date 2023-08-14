@@ -6,7 +6,7 @@ function getVersionFromText(message: string): {
   [key: string]: string | undefined;
 } {
   const match =
-    /\[(?<major>\d+)?\.(?<minor>\d+)?\.(?<patch>\d+)?\]/.exec(message);
+    /(?<major>\d+)?\.(?<minor>\d+)?\.(?<patch>\d+)?/.exec(message);
   if (!match || !match.groups) {
     return {};
   }

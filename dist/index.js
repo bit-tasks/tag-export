@@ -10933,7 +10933,7 @@ const exec_1 = __nccwpck_require__(1514);
 const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
 function getVersionFromText(message) {
-    const match = /\[version:(?<major>\d+)?\.(?<minor>\d+)?\.(?<patch>\d+)?\]/.exec(message);
+    const match = /(?<major>\d+)?\.(?<minor>\d+)?\.(?<patch>\d+)?/.exec(message);
     if (!match || !match.groups) {
         return {};
     }
