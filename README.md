@@ -13,7 +13,7 @@ This task executes `bit tag -m "CI" && bit export` inside the workspace director
 
 ## Tag version
 
-Specify the version tag for your components using the following methods. You can use any of these version keywords: major, minor, patch, and pre-release. You can present these keywords either as standalone surrounded by spaces like major or enclosed within square brackets such as [major].
+Specify the version tag for your components using the following methods. You can use any of these version keywords: `major`, `minor`, `patch`, and `pre-release`. You can present these keywords either as standalone surrounded by spaces like major or enclosed within square brackets such as `[major]`.
 
 ### Through `Pull Requests`
 
@@ -21,7 +21,7 @@ Specify the version tag for your components using the following methods. You can
 
 **Title:** Alternatively, you can include the version keyword in the Pull Request title. If the keyword is present in both the label and title, the label takes precedence.
 
-**Note:** Once a Pull Request is merged, it's identified by tracking its associated commit (most recent) in the target branch.
+**Note:** Once a Pull Request is merged, it's identified by tracking the most recent commit in the target branch.
 
 ### Directly via `Git Push`
 
