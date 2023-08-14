@@ -25,7 +25,7 @@ Specify the version tag for your components using the following methods. You can
 
 ### Git Commit
 
-Incorporate the version keyword in the title of your Git commit message.
+**Title:** Incorporate the version keyword in the title of your Git commit message.
 
 **Note:** The version based on the latest commit title.
 
