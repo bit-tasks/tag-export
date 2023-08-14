@@ -11,6 +11,15 @@ This task executes `bit tag -m "CI" && bit export` inside the workspace director
 
 **Optional** The workspace directory path from the root. Default `"Dir specified in Init Task or ./"`.
 
+## Tag version
+
+There are two ways to define the tag version for your components. 
+
+- **Git Commit Title:** In your git commit title you use the following flags `[major]`, `[minor]`, `[patch]`, `[pre-release]`. e.g: `Test commit message [minor]`.
+
+- **Pull Request Label:** Create a label `major`, `minor`, `patch`, `pre-release` in your pull request. After merging the pull request, the version defined in the label will be used to tag the components.
+
+
 ## Example usage
 
 **Note:** Use `bit-task/init@v1` as a prior step in your action before running `bit-tasks/tag-export@v1`.
