@@ -2,14 +2,13 @@ import { exec } from "@actions/exec";
 import * as github from "@actions/github";
 import * as core from "@actions/core";
 
-function getVersionKeyword(text: string): string | null {
+function getVersionKeyword(text: string, fullMatch: boolean = false): string | null {
   const keywords = ["patch", "major", "minor", "pre-release"];
 
   return (
     keywords.find(
       (keyword) =>
-        text.includes(` ${keyword} `) ||
-        text.endsWith(` ${keyword}`) ||
+        (fullMatch && text === keyword) ||
         text.includes(`[${keyword}]`)
     ) || null
   );
@@ -53,7 +52,7 @@ async function fetchVersionFromLatestCommitPR(): Promise<string | null> {
 
     // 1. Check PR Labels
     const labelVersion = labels
-      .map((label) => getVersionKeyword(label.name))
+      .map((label) => getVersionKeyword(label.name, true))
       .find((v) => v);
     if (labelVersion) {
       return labelVersion;
