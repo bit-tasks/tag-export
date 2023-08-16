@@ -10932,10 +10932,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const exec_1 = __nccwpck_require__(1514);
 const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
-function getVersionKeyword(text) {
+function getVersionKeyword(text, fullMatch = false) {
     const keywords = ["patch", "major", "minor", "pre-release"];
-    return (keywords.find((keyword) => text.includes(` ${keyword} `) ||
-        text.endsWith(` ${keyword}`) ||
+    return (keywords.find((keyword) => (fullMatch && text === keyword) ||
         text.includes(`[${keyword}]`)) || null);
 }
 function fetchVersionFromLatestCommitPR() {
@@ -10970,7 +10969,7 @@ function fetchVersionFromLatestCommitPR() {
             });
             // 1. Check PR Labels
             const labelVersion = labels
-                .map((label) => getVersionKeyword(label.name))
+                .map((label) => getVersionKeyword(label.name, true))
                 .find((v) => v);
             if (labelVersion) {
                 return labelVersion;
