@@ -1,5 +1,5 @@
 # Bit Tag and Export for CI/CD Pipelines
-Persist Bit Soft Tags and Export to Remote Scope
+Big Tag and Export to Remote Scope
 
 # GitHub Actions
 
