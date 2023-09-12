@@ -10986,7 +10986,7 @@ function fetchVersionFromLatestCommitPR() {
 }
 const run = (wsdir) => __awaiter(void 0, void 0, void 0, function* () {
     const version = yield fetchVersionFromLatestCommitPR();
-    let command = 'bit tag -m "CI"';
+    let command = 'bit tag -m "CI" --build';
     if (version) {
         command += ` --${version}`;
     }

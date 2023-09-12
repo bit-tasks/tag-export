@@ -71,7 +71,7 @@ async function fetchVersionFromLatestCommitPR(): Promise<string | null> {
 
 const run = async (wsdir: string) => {
   const version = await fetchVersionFromLatestCommitPR();
-  let command = 'bit tag -m "CI"';
+  let command = 'bit tag -m "CI" --build';
 
   if (version) {
     command += ` --${version}`;
