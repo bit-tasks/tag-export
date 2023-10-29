@@ -7,6 +7,9 @@ inputs:
   ws-dir:
     description: "Workspace json file directory path"
     required: false
+  persist:
+    description: "Persist soft tagged components"
+    required: false
 runs:
   using: 'node16'
   main: 'dist/index.js'

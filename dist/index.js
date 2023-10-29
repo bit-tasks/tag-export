@@ -10882,7 +10882,8 @@ const core = __importStar(__nccwpck_require__(2186));
 const tag_export_1 = __importDefault(__nccwpck_require__(3905));
 try {
     const wsDir = core.getInput("ws-dir") || process.env.WSDIR || "./";
-    (0, tag_export_1.default)(wsDir);
+    const persist = core.getInput("persist") === "true" ? true : false;
+    (0, tag_export_1.default)(wsDir, persist);
 }
 catch (error) {
     core.setFailed(error.message);
@@ -10984,11 +10985,14 @@ function fetchVersionFromLatestCommitPR() {
         return getVersionKeyword(commitMessage);
     });
 }
-const run = (wsdir) => __awaiter(void 0, void 0, void 0, function* () {
+const run = (wsdir, persist) => __awaiter(void 0, void 0, void 0, function* () {
     const version = yield fetchVersionFromLatestCommitPR();
     let command = 'bit tag -m "CI" --build';
     if (version) {
         command += ` --${version}`;
+    }
+    if (persist) {
+        command += ` --persist`;
     }
     yield (0, exec_1.exec)(command, [], { cwd: wsdir });
     yield (0, exec_1.exec)("bit export", [], { cwd: wsdir });

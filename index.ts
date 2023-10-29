@@ -3,7 +3,9 @@ import run from "./scripts/tag-export";
 
 try {
   const wsDir: string = core.getInput("ws-dir") || process.env.WSDIR || "./";
-  run(wsDir);
+  const persist: boolean =
+  core.getInput("persist") === "true" ? true : false;
+  run(wsDir, persist);
 } catch (error) {
   core.setFailed((error as Error).message);
 }

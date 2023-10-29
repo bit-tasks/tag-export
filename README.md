@@ -11,6 +11,10 @@ This task executes `bit tag -m "CI" && bit export` inside the workspace director
 
 **Optional** The workspace directory path from the root. Default `"Dir specified in Init Task or ./"`.
 
+### `persist`
+
+**Optional** Persist soft tagged components by adding `--persist` flag.
+
 ## Tag version
 
 Specify the version tag for your components using the following methods. You can use any of these version keywords: `major`, `minor`, `patch`, and `pre-release`. 

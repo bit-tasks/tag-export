@@ -69,13 +69,17 @@ async function fetchVersionFromLatestCommitPR(): Promise<string | null> {
   return getVersionKeyword(commitMessage);
 }
 
-const run = async (wsdir: string) => {
+const run = async (wsdir: string, persist: boolean) => {
   const version = await fetchVersionFromLatestCommitPR();
   let command = 'bit tag -m "CI" --build';
 
   if (version) {
     command += ` --${version}`;
-  }
+  } 
+  
+  if (persist) {
+    command += ` --persist`;
+  } 
 
   await exec(command, [], { cwd: wsdir });
   await exec("bit export", [], { cwd: wsdir });
