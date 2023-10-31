@@ -10881,9 +10881,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const tag_export_1 = __importDefault(__nccwpck_require__(3905));
 try {
+    const githubToken = process.env.GITHUB_TOKEN;
     const wsDir = core.getInput("ws-dir") || process.env.WSDIR || "./";
     const persist = core.getInput("persist") === "true" ? true : false;
-    (0, tag_export_1.default)(wsDir, persist);
+    if (!githubToken) {
+        throw new Error("GitHub token not found");
+    }
+    (0, tag_export_1.default)(githubToken, wsDir, persist);
 }
 catch (error) {
     core.setFailed(error.message);
@@ -10931,12 +10935,44 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const exec_1 = __nccwpck_require__(1514);
-const github = __importStar(__nccwpck_require__(5438));
+const github_1 = __nccwpck_require__(5438);
 const core = __importStar(__nccwpck_require__(2186));
+const createTagMessageText = (githubToken) => __awaiter(void 0, void 0, void 0, function* () {
+    const { repo, owner } = github_1.context === null || github_1.context === void 0 ? void 0 : github_1.context.repo;
+    const octokit = (0, github_1.getOctokit)(githubToken);
+    let messageText = "CI";
+    const { data: pullRequests } = yield octokit.rest.pulls.list({
+        owner,
+        repo,
+        state: "closed",
+        sort: "updated",
+        direction: "desc", // Sort in descending order (newest first)
+    });
+    const lastMergedPullRequest = pullRequests.find((pr) => pr.merged_at !== null);
+    const prTitle = lastMergedPullRequest === null || lastMergedPullRequest === void 0 ? void 0 : lastMergedPullRequest.title;
+    const prNumber = lastMergedPullRequest === null || lastMergedPullRequest === void 0 ? void 0 : lastMergedPullRequest.number;
+    core.info("PR title: " + prTitle);
+    core.info("PR number: " + prNumber);
+    if (prTitle) {
+        messageText = prTitle;
+    }
+    else if (prNumber) {
+        const { data: commits } = yield octokit.rest.pulls.listCommits({
+            owner: owner,
+            repo: repo,
+            pull_number: prNumber,
+        });
+        if (commits.length > 0) {
+            messageText = commits[commits.length - 1].commit.message;
+            core.info("Last commit message: " + messageText);
+        }
+    }
+    core.info("Tag message Text: " + messageText);
+    return messageText;
+});
 function getVersionKeyword(text, fullMatch = false) {
     const keywords = ["patch", "major", "minor", "pre-release"];
-    return (keywords.find((keyword) => (fullMatch && text === keyword) ||
-        text.includes(`[${keyword}]`)) || null);
+    return (keywords.find((keyword) => (fullMatch && text === keyword) || text.includes(`[${keyword}]`)) || null);
 }
 function fetchVersionFromLatestCommitPR() {
     var _a;
@@ -10945,8 +10981,8 @@ function fetchVersionFromLatestCommitPR() {
         if (!githubToken) {
             throw new Error("GitHub token not found");
         }
-        const octokit = github.getOctokit(githubToken);
-        const { repo, ref } = github.context;
+        const octokit = (0, github_1.getOctokit)(githubToken);
+        const { repo, ref } = github_1.context;
         const branch = ref.replace("refs/heads/", "");
         const { data: commit } = yield octokit.rest.repos.getCommit({
             owner: repo.owner,
@@ -10985,9 +11021,10 @@ function fetchVersionFromLatestCommitPR() {
         return getVersionKeyword(commitMessage);
     });
 }
-const run = (wsdir, persist) => __awaiter(void 0, void 0, void 0, function* () {
+const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, function* () {
     const version = yield fetchVersionFromLatestCommitPR();
-    let command = 'bit tag -m "CI" --build';
+    const tagMessageText = yield createTagMessageText(githubToken);
+    let command = `bit tag -m "${tagMessageText}" --build`;
     if (version) {
         command += ` --${version}`;
     }
