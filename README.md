@@ -54,7 +54,7 @@ jobs:
         uses: bit-tasks/init@v1
         with:
           ws-dir: '<WORKSPACE_DIR_PATH>'
-          persist: 'false'
+          persist: 'false' # Set to 'true' if you want to use 'tag --soft'
       - name: Bit Tag and Export
         uses: bit-tasks/tag-export@v1
 ```
