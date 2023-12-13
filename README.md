@@ -55,9 +55,9 @@ jobs:
         with:
           ws-dir: '<WORKSPACE_DIR_PATH>'
       - name: Bit Tag and Export
+        uses: bit-tasks/tag-export@v1
         with:
           persist: 'false' # Set to 'true' if you use the soft tag flow
-        uses: bit-tasks/tag-export@v1
 ```
 
 # Contributor Guide
