@@ -37,10 +37,14 @@ Specify the version tag for your components using the following methods. You can
 ```yaml
 name: Test Bit Tag and Export
 on:
-  workflow_dispatch:
+  pull_request:
+    branches: 
+      - main
+    types: [closed]
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.merged }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
