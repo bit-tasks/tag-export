@@ -10882,10 +10882,10 @@ const core = __importStar(__nccwpck_require__(2186));
 const tag_export_1 = __importDefault(__nccwpck_require__(3905));
 try {
     const githubToken = process.env.GITHUB_TOKEN;
-    const wsDir = core.getInput("ws-dir") || process.env.WSDIR || "./";
-    const persist = core.getInput("persist") === "true" ? true : false;
+    const wsDir = process.env.WSDIR;
+    const persist = core.getInput('persist') === 'true' ? true : false;
     if (!githubToken) {
-        throw new Error("GitHub token not found");
+        throw new Error('GitHub token not found');
     }
     (0, tag_export_1.default)(githubToken, wsDir, persist);
 }
@@ -10937,77 +10937,101 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const exec_1 = __nccwpck_require__(1514);
 const github_1 = __nccwpck_require__(5438);
 const core = __importStar(__nccwpck_require__(2186));
-const createTagMessageText = (githubToken) => __awaiter(void 0, void 0, void 0, function* () {
-    const { repo, owner } = github_1.context === null || github_1.context === void 0 ? void 0 : github_1.context.repo;
+/**
+ *
+ */ const createTagMessageText = (githubToken) => __awaiter(void 0, void 0, void 0, function* () {
+    const { repo, owner } = github_1.context.repo;
     const octokit = (0, github_1.getOctokit)(githubToken);
-    let messageText = "CI";
+    let messageText = 'CI';
     const { data: pullRequests } = yield octokit.rest.pulls.list({
         owner,
         repo,
-        state: "closed",
-        sort: "updated",
-        direction: "desc", // Sort in descending order (newest first)
+        state: 'closed',
+        sort: 'updated',
+        direction: 'desc' // Sort in descending order (newest first)
     });
-    const lastMergedPullRequest = pullRequests.find((pr) => pr.merged_at !== null);
+    const lastMergedPullRequest = pullRequests.find(pr => pr.merged_at !== null);
     const prTitle = lastMergedPullRequest === null || lastMergedPullRequest === void 0 ? void 0 : lastMergedPullRequest.title;
     const prNumber = lastMergedPullRequest === null || lastMergedPullRequest === void 0 ? void 0 : lastMergedPullRequest.number;
-    core.info("PR title: " + prTitle);
-    core.info("PR number: " + prNumber);
+    core.info(`PR title: ${prTitle}`);
+    core.info(`PR number: ${prNumber}`);
     if (prTitle) {
         messageText = prTitle;
     }
     else if (prNumber) {
         const { data: commits } = yield octokit.rest.pulls.listCommits({
-            owner: owner,
-            repo: repo,
-            pull_number: prNumber,
+            owner,
+            repo,
+            pull_number: prNumber
         });
         if (commits.length > 0) {
             messageText = commits[commits.length - 1].commit.message;
-            core.info("Last commit message: " + messageText);
+            core.info(`Last commit message: ${messageText}`);
         }
     }
-    core.info("Tag message Text: " + messageText);
+    core.info(`Tag message Text: ${messageText}`);
     return messageText;
 });
+/**
+ * Returns the version keyword found in the given text. If the fullMatch parameter is true, it only returns the keyword if it is an exact match. Otherwise, it returns the keyword if it is found within square brackets in the text. Returns null if no keyword is found.
+ * @author Jonathan Stevens (@TGTGamer)
+ *
+ * @param text function to get the version keyword from a given text
+ * @param [fullMatch=false]
+ * @returns This function takes in a string and a boolean flag, and returns a string or null. It searches for keywords in the input string and returns the matching keyword if found, otherwise null. The search can be performed in two different ways: if the 'fullMatch' flag is true, it checks for an exact match between the input string and the keywords; otherwise, it checks if the input string includes a specific keyword enclosed in square brackets.
+ */
 function getVersionKeyword(text, fullMatch = false) {
-    const keywords = ["patch", "major", "minor", "pre-release"];
-    return (keywords.find((keyword) => (fullMatch && text === keyword) || text.includes(`[${keyword}]`)) || null);
+    const keywords = ['patch', 'major', 'minor', 'pre-release'];
+    return (keywords.find(keyword => (fullMatch && text === keyword) || text.includes(`[${keyword}]`)) || null);
 }
+/**
+ * This function fetches the version from the latest commit in a pull request. It uses the GitHub token stored in the environment variable 'GITHUB_TOKEN' to authenticate with the GitHub API. It retrieves the commit message from the latest commit in the pull request and checks for version information in the pull request labels, title, and commit message. If a version is found, it is returned as a string. If no version is found or if any necessary information is missing, null is returned.
+ * @author Jonathan Stevens (@TGTGamer)
+ *
+ * @async
+ * @returns This function fetches the version number from the latest commit of a pull request. It requires the 'GITHUB_TOKEN' environment variable to be set. It returns the version number as a string, or null if the version number is not found.
+ */
+/**
+ * Fetches the version from the latest commit in a pull request. Returns the version as a string or null if no version is found.
+ * @author Jonathan Stevens (@TGTGamer)
+ *
+ * @async
+ * @returns This function fetches the version number from the latest commit in a pull request. It first checks the labels of the pull request, then the title, and finally the commit message to find the version number. If no version number is found, it returns null.
+ */
 function fetchVersionFromLatestCommitPR() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const githubToken = process.env.GITHUB_TOKEN;
         if (!githubToken) {
-            throw new Error("GitHub token not found");
+            throw new Error('GitHub token not found');
         }
         const octokit = (0, github_1.getOctokit)(githubToken);
         const { repo, ref } = github_1.context;
-        const branch = ref.replace("refs/heads/", "");
+        const branch = ref.replace('refs/heads/', '');
         const { data: commit } = yield octokit.rest.repos.getCommit({
             owner: repo.owner,
             repo: repo.repo,
-            ref: branch,
+            ref: branch
         });
         const commitMessage = (_a = commit === null || commit === void 0 ? void 0 : commit.commit) === null || _a === void 0 ? void 0 : _a.message;
-        core.info("Commit Message: " + commitMessage);
+        core.info(`Commit Message: ${commitMessage}`);
         if (!repo || !commitMessage) {
-            core.info("Repo information or commit message is not available.");
+            core.info('Repo information or commit message is not available.');
             return null;
         }
         const prNumberMatch = /Merge pull request #(\d+)/.exec(commitMessage);
         if (prNumberMatch) {
             const prNumber = prNumberMatch[1];
-            core.info("PR Number: " + prNumber);
-            const { data: { title, labels }, } = yield octokit.rest.pulls.get({
+            core.info(`PR Number: ${prNumber}`);
+            const { data: { title, labels } } = yield octokit.rest.pulls.get({
                 owner: repo.owner,
                 repo: repo.repo,
-                pull_number: parseInt(prNumber, 10),
+                pull_number: parseInt(prNumber, 10)
             });
             // 1. Check PR Labels
             const labelVersion = labels
-                .map((label) => getVersionKeyword(label.name, true))
-                .find((v) => v);
+                .map(label => getVersionKeyword(label.name, true))
+                .find(v => v);
             if (labelVersion) {
                 return labelVersion;
             }
@@ -11021,6 +11045,8 @@ function fetchVersionFromLatestCommitPR() {
         return getVersionKeyword(commitMessage);
     });
 }
+/**
+ */
 const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, function* () {
     const version = yield fetchVersionFromLatestCommitPR();
     const tagMessageText = yield createTagMessageText(githubToken);
@@ -11032,7 +11058,7 @@ const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, f
         command += ` --persist`;
     }
     yield (0, exec_1.exec)(command, [], { cwd: wsdir });
-    yield (0, exec_1.exec)("bit export", [], { cwd: wsdir });
+    yield (0, exec_1.exec)('bit export', [], { cwd: wsdir });
 });
 exports["default"] = run;
 
