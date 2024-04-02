@@ -11024,15 +11024,17 @@ function fetchVersionFromLatestCommitPR() {
 const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, function* () {
     const version = yield fetchVersionFromLatestCommitPR();
     const tagMessageText = yield createTagMessageText(githubToken);
-    let command = `bit tag -m "${tagMessageText}" --build --log`;
+    let command = `bit tag -m "${tagMessageText}" --build`;
     if (version) {
         command += ` --${version}`;
     }
     if (persist) {
         command += ` --persist`;
     }
+    core.info(`command: executing ${command}`);
     yield (0, exec_1.exec)(command, [], { cwd: wsdir });
-    yield (0, exec_1.exec)("bit export --log", [], { cwd: wsdir });
+    core.info("command: executing 'bit export'");
+    yield (0, exec_1.exec)("bit export", [], { cwd: wsdir });
 });
 exports["default"] = run;
 
