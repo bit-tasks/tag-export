@@ -125,7 +125,7 @@ const run = async (
 
   const tagMessageText = await createTagMessageText(githubToken);
 
-  let command = `bit tag -m "${tagMessageText}" --build`;
+  let command = `bit tag -m "${tagMessageText}" --build --log`;
 
   if (version) {
     command += ` --${version}`;
@@ -136,7 +136,7 @@ const run = async (
   }
 
   await exec(command, [], { cwd: wsdir });
-  await exec("bit export", [], { cwd: wsdir });
+  await exec("bit export --log", [], { cwd: wsdir });
 };
 
 export default run;
