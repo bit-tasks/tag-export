@@ -125,20 +125,35 @@ const run = async (
 
   const tagMessageText = await createTagMessageText(githubToken);
 
-  let command = `bit tag -m "${tagMessageText}" --build`;
+  // Define global arguments for logging if applicable
+  const globalArgs = [];
+  if (process.env.LOG) {
+    globalArgs.push(`--log=${process.env.LOG}`);
+  }
+
+  // Build the tag command with global arguments and specific options
+  const tagArgs = ['tag', '-m', `"${tagMessageText}"`, ...globalArgs];
+  
+  if (process.env.RIPPLE !== "true") {
+    tagArgs.push('--build');
+  }
 
   if (version) {
-    command += ` --${version}`;
+    tagArgs.push(`--${version}`); // Ensure version is prefixed with '--'
   }
 
   if (persist) {
-    command += ` --persist`;
+    tagArgs.push('--persist');
   }
 
-  core.info(`command: executing ${command}`);
-  await exec(command, [], { cwd: wsdir });
-  core.info("command: executing 'bit export'");
-  await exec("bit export", [], { cwd: wsdir });
+  core.info(`command: executing bit ${tagArgs.join(' ')}`);
+  await exec('bit', tagArgs, { cwd: wsdir });
+
+  // Use the same global arguments for the export command
+  const exportArgs = ['export', ...globalArgs];
+
+  core.info(`command: executing bit ${exportArgs.join(' ')}`);
+  await exec('bit', exportArgs, { cwd: wsdir });
 };
 
 export default run;

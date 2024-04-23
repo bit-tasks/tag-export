@@ -11024,17 +11024,28 @@ function fetchVersionFromLatestCommitPR() {
 const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, function* () {
     const version = yield fetchVersionFromLatestCommitPR();
     const tagMessageText = yield createTagMessageText(githubToken);
-    let command = `bit tag -m "${tagMessageText}" --build`;
+    // Define global arguments for logging if applicable
+    const globalArgs = [];
+    if (process.env.LOG) {
+        globalArgs.push(`--log=${process.env.LOG}`);
+    }
+    // Build the tag command with global arguments and specific options
+    const tagArgs = ['tag', '-m', `"${tagMessageText}"`, ...globalArgs];
+    if (process.env.RIPPLE !== "true") {
+        tagArgs.push('--build');
+    }
     if (version) {
-        command += ` --${version}`;
+        tagArgs.push(`--${version}`); // Ensure version is prefixed with '--'
     }
     if (persist) {
-        command += ` --persist`;
+        tagArgs.push('--persist');
     }
-    core.info(`command: executing ${command}`);
-    yield (0, exec_1.exec)(command, [], { cwd: wsdir });
-    core.info("command: executing 'bit export'");
-    yield (0, exec_1.exec)("bit export", [], { cwd: wsdir });
+    core.info(`command: executing bit ${tagArgs.join(' ')}`);
+    yield (0, exec_1.exec)('bit', tagArgs, { cwd: wsdir });
+    // Use the same global arguments for the export command
+    const exportArgs = ['export', ...globalArgs];
+    core.info(`command: executing bit ${exportArgs.join(' ')}`);
+    yield (0, exec_1.exec)('bit', exportArgs, { cwd: wsdir });
 });
 exports["default"] = run;
 
