@@ -11024,7 +11024,7 @@ function getOverridenVersions(labels) {
         if (name.endsWith('@inherit')) {
             return name.replace('@inherit', '');
         }
-        return name;
+        return `"${name}"`;
     })
         .join(' ');
 }
