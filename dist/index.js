@@ -11018,6 +11018,21 @@ function getVersionFromPRTitle(title) {
 function getVersionFromCommitTitle(message) {
     return message ? getVersionKeyword(message) : null;
 }
+function getOverridenVersions(labels) {
+    if (!labels)
+        return '';
+    const versionPattern = /@(major|minor|patch|inherit)$/;
+    return labels
+        .map(label => label.name)
+        .filter(name => versionPattern.test(name))
+        .map(name => {
+        if (name.endsWith('@inherit')) {
+            return name.replace('@inherit', '');
+        }
+        return name;
+    })
+        .join(' ');
+}
 const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, function* () {
     const { prDetails, commitMessage } = yield fetchVersionFromLatestCommitPR();
     const version = getVersionFromLabel(prDetails === null || prDetails === void 0 ? void 0 : prDetails.labels) ||
@@ -11039,6 +11054,11 @@ const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, f
     }
     if (persist) {
         tagArgs.push('--persist');
+    }
+    const overridenComponentVersions = getOverridenVersions(prDetails === null || prDetails === void 0 ? void 0 : prDetails.labels);
+    core.info('Overriden labels: ' + overridenComponentVersions);
+    if (overridenComponentVersions) {
+        tagArgs.push(overridenComponentVersions);
     }
     core.info(`command: executing bit ${tagArgs.join(' ')}`);
     yield (0, exec_1.exec)('bit', tagArgs, { cwd: wsdir });
