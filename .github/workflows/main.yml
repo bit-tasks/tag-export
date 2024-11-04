@@ -1,6 +1,9 @@
 name: Test Tag and Export
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 permissions:
   contents: read
   pull-requests: read
