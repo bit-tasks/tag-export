@@ -105,17 +105,17 @@ function getVersionFromCommitTitle(message?: string): string | null {
   return message ? getVersionKeyword(message) : null;
 }
 
-function getOverridenVersions(labels?: { name: string }[]): string {
+function getOverridenVersions(labels?: any[]): string {
   if (!labels) return '';
   
   const versionPattern = /@(major|minor|patch|inherit)$/;
   
   return labels
-    .map((label: { name: string }) => label.name)
-    .filter((name: string) => versionPattern.test(name))
-    .map((name: string) => {
+    .map(label => label.name)
+    .filter(name => versionPattern.test(name))
+    .map(name => {
       if (name.endsWith('@inherit')) {
-        return name.replace('@inherit', '');
+        return `"${name.replace('@inherit', '')}"`;
       }
       return `"${name}"`;
     })

@@ -11018,11 +11018,11 @@ function getOverridenVersions(labels) {
         return '';
     const versionPattern = /@(major|minor|patch|inherit)$/;
     return labels
-        .map((label) => label.name)
-        .filter((name) => versionPattern.test(name))
-        .map((name) => {
+        .map(label => label.name)
+        .filter(name => versionPattern.test(name))
+        .map(name => {
         if (name.endsWith('@inherit')) {
-            return name.replace('@inherit', '');
+            return `"${name.replace('@inherit', '')}"`;
         }
         return `"${name}"`;
     })
