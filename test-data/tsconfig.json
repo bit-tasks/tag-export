@@ -1,10 +1,10 @@
+// bit-generated-typescript-config
 {
-  "extends": "./node_modules/@teambit/react/typescript/tsconfig.json",
-  // "include": [],
+  "extends": "./node_modules/.cache/tsconfig.bit.754597940e9abfd8eacb085e29f60aeb341bb92f.json",
   "compilerOptions": {
-    "noEmit": true
-  },
-  "exclude": [
-    "dist"
-  ]
+    "typeRoots": [
+      "./node_modules/.cache/global-types",
+      "./node_modules/@types"
+    ]
+  }
 }
