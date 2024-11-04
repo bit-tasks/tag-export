@@ -61,7 +61,7 @@ function getVersionKeyword(
   );
 }
 
-async function fetchVersionFromLatestCommitPR(): Promise<string | null> {
+async function fetchVersionFromLatestCommitPR(): Promise<{ prDetails?: any, commitMessage?: string }> {
   const githubToken = process.env.GITHUB_TOKEN;
   if (!githubToken) {
     throw new Error("GitHub token not found");
@@ -82,7 +82,7 @@ async function fetchVersionFromLatestCommitPR(): Promise<string | null> {
 
   if (!repo || !commitMessage) {
     core.info("Repo information or commit message is not available.");
-    return null;
+    return { commitMessage };
   }
 
   const prNumberMatch = /Merge pull request #(\d+)/.exec(commitMessage);
@@ -97,23 +97,22 @@ async function fetchVersionFromLatestCommitPR(): Promise<string | null> {
       pull_number: parseInt(prNumber, 10),
     });
 
-    // 1. Check PR Labels
-    const labelVersion = labels
-      .map((label) => getVersionKeyword(label.name, true))
-      .find((v) => v);
-    if (labelVersion) {
-      return labelVersion;
-    }
-
-    // 2. Fallback to PR title
-    const prTitleVersion = getVersionKeyword(title);
-    if (prTitleVersion) {
-      return prTitleVersion;
-    }
+    return { prDetails: { title, labels }, commitMessage };
   }
 
-  // 3. Last Fallback: Check the commit message
-  return getVersionKeyword(commitMessage);
+  return { commitMessage };
+}
+
+function getVersionFromLabel(labels?: any[]): string | null {
+  return labels?.map(label => getVersionKeyword(label.name, true)).find(v => v) || null;
+}
+
+function getVersionFromPRTitle(title?: string): string | null {
+  return title ? getVersionKeyword(title) : null;
+}
+
+function getVersionFromCommitTitle(message?: string): string | null {
+  return message ? getVersionKeyword(message) : null;
 }
 
 const run = async (
@@ -121,7 +120,11 @@ const run = async (
   wsdir: string,
   persist: boolean
 ) => {
-  const version = await fetchVersionFromLatestCommitPR();
+  const { prDetails, commitMessage } = await fetchVersionFromLatestCommitPR();
+  const version = 
+    getVersionFromLabel(prDetails?.labels) || 
+    getVersionFromPRTitle(prDetails?.title) || 
+    getVersionFromCommitTitle(commitMessage);
 
   const tagMessageText = await createTagMessageText(githubToken);
 

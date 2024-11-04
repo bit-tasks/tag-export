@@ -10993,7 +10993,7 @@ function fetchVersionFromLatestCommitPR() {
         core.info("Commit Message: " + commitMessage);
         if (!repo || !commitMessage) {
             core.info("Repo information or commit message is not available.");
-            return null;
+            return { commitMessage };
         }
         const prNumberMatch = /Merge pull request #(\d+)/.exec(commitMessage);
         if (prNumberMatch) {
@@ -11004,25 +11004,25 @@ function fetchVersionFromLatestCommitPR() {
                 repo: repo.repo,
                 pull_number: parseInt(prNumber, 10),
             });
-            // 1. Check PR Labels
-            const labelVersion = labels
-                .map((label) => getVersionKeyword(label.name, true))
-                .find((v) => v);
-            if (labelVersion) {
-                return labelVersion;
-            }
-            // 2. Fallback to PR title
-            const prTitleVersion = getVersionKeyword(title);
-            if (prTitleVersion) {
-                return prTitleVersion;
-            }
+            return { prDetails: { title, labels }, commitMessage };
         }
-        // 3. Last Fallback: Check the commit message
-        return getVersionKeyword(commitMessage);
+        return { commitMessage };
     });
 }
+function getVersionFromLabel(labels) {
+    return (labels === null || labels === void 0 ? void 0 : labels.map(label => getVersionKeyword(label.name, true)).find(v => v)) || null;
+}
+function getVersionFromPRTitle(title) {
+    return title ? getVersionKeyword(title) : null;
+}
+function getVersionFromCommitTitle(message) {
+    return message ? getVersionKeyword(message) : null;
+}
 const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, function* () {
-    const version = yield fetchVersionFromLatestCommitPR();
+    const { prDetails, commitMessage } = yield fetchVersionFromLatestCommitPR();
+    const version = getVersionFromLabel(prDetails === null || prDetails === void 0 ? void 0 : prDetails.labels) ||
+        getVersionFromPRTitle(prDetails === null || prDetails === void 0 ? void 0 : prDetails.title) ||
+        getVersionFromCommitTitle(commitMessage);
     const tagMessageText = yield createTagMessageText(githubToken);
     // Define global arguments for logging if applicable
     const globalArgs = [];
