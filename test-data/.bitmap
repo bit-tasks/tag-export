@@ -12,7 +12,7 @@
     "apps/my-app": {
         "name": "apps/my-app",
         "scope": "bit-tasks.test-scope",
-        "version": "0.0.6",
+        "version": "0.0.7",
         "mainFile": "index.ts",
         "rootDir": "test-scope/apps/my-app"
     },
@@ -26,7 +26,7 @@
     "ui/hello-world": {
         "name": "ui/hello-world",
         "scope": "bit-tasks.test-scope",
-        "version": "0.0.7",
+        "version": "0.0.8",
         "mainFile": "index.ts",
         "rootDir": "test-scope/ui/hello-world"
     },
