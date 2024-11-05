@@ -108,14 +108,14 @@ function getVersionFromCommitTitle(message?: string): string | null {
 function getOverridenVersions(labels?: any[]): string {
   if (!labels) return '';
   
-  const versionPattern = /@(major|minor|patch|inherit)$/;
+  const versionPattern = /@(major|minor|patch|auto)$/;
   
   return labels
     .map(label => label.name)
     .filter(name => versionPattern.test(name))
     .map(name => {
-      if (name.endsWith('@inherit')) {
-        return `"${name.replace('@inherit', '')}"`;
+      if (name.endsWith('@auto')) {
+        return `"${name.replace('@auto', '')}"`;
       }
       return `"${name}"`;
     })
@@ -126,7 +126,7 @@ async function removeVersionLabels(prDetails: any, prNumber: number, githubToken
   if (!prDetails?.labels) return;
   
   const octokit = getOctokit(githubToken);
-  const versionPattern = /@(major|minor|patch|inherit)$/;
+  const versionPattern = /@(major|minor|patch|auto)$/;
   
   const labelsToRemove = prDetails.labels
     .filter((label: { name: string }) => versionPattern.test(label.name))
