@@ -25,11 +25,11 @@ Specify the version tag for your components using the following methods. You can
 3. Pull Request or Commit Title
 4. Default to `patch` version
 
-When using with `bit-tasks/pull-request@v2`, component-specific version labels (e.g., `org.scope/component@minor`) take precedence over general PR labels or commit messages. These labels can be:
+When using with `bit-tasks/pull-request@v2` and `bit-tasks/tag-export@v2`, component-specific version labels (e.g., `org.scope/component@minor`) take precedence over general PR labels or commit messages. These labels can be:
 - Auto-generated as `component-id@auto`
 - Manually modified to force specific versions: `@patch`, `@minor`, or `@major`
 
-**Note:** Once a Pull Request is merged, it's tracked via its `merge commit` in the target branch. Therefore, the `merge commit` should be the last in the commit history for the action to read the version keyword from the Pull Request.
+**Note:** Component version labels support requires both `bit-tasks/pull-request@v2` and `bit-tasks/tag-export@v2` or higher versions.
 
 ### Git Commit
 
