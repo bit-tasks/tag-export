@@ -19,8 +19,15 @@ This task executes `bit tag -m "CI" && bit export` inside the workspace director
 
 Specify the version tag for your components using the following methods. You can use any of these version keywords: `major`, `minor`, `patch`, and `pre-release`. 
 
-- **Pull Request Labels:** Use the keyword directly as a label `major` or enclosed within square brackets `[major]`.
-- **Pull Request or Commit Title:** Include the version keyword enclosed within square brackets `[major]` within your title text.
+**Priority Order:**
+1. Component version labels added/modified by the pull-request task (when `version-label: true` is set)
+2. Pull Request Labels
+3. Pull Request or Commit Title
+4. Default to `patch` version
+
+When using with `bit-tasks/pull-request@v2`, component-specific version labels (e.g., `org.scope/component@minor`) take precedence over general PR labels or commit messages. These labels can be:
+- Auto-generated as `component-id@auto`
+- Manually modified to force specific versions: `@patch`, `@minor`, or `@major`
 
 **Note:** Once a Pull Request is merged, it's tracked via its `merge commit` in the target branch. Therefore, the `merge commit` should be the last in the commit history for the action to read the version keyword from the Pull Request.
 
