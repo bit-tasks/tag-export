@@ -39,7 +39,7 @@ When using with `bit-tasks/pull-request@v2` and `bit-tasks/tag-export@v2`, compo
 
 ## Example usage
 
-**Note:** Use `bit-task/init@v1` as a prior step in your action before running `bit-tasks/tag-export@v1`.
+**Note:** Use `bit-task/init@v2` as a prior step in your action before running `bit-tasks/tag-export@v2`.
 
 ```yaml
 name: Test Bit Tag and Export
@@ -65,7 +65,7 @@ jobs:
         with:
           ws-dir: '<WORKSPACE_DIR_PATH>'
       - name: Bit Tag and Export
-        uses: bit-tasks/tag-export@v1
+        uses: bit-tasks/tag-export@v2
         with:
           persist: 'false' # Set to 'true' if you use the soft tag flow
 ```
