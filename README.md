@@ -48,6 +48,8 @@ on:
     branches: 
       - main
     types: [closed]
+permissions:
+  pull-requests: write  # Ensure write permission for pull requests
 jobs:
   release:
     runs-on: ubuntu-latest
