@@ -41,7 +41,14 @@ function getVersionKeyword(
   text: string,
   fullMatch: boolean = false
 ): string | null {
-  const keywords = ["patch", "major", "minor", "pre-release"];
+  const keywords = ["patch", "major", "minor"];
+  const preReleasePattern = /\[pre-release:(.+?)\]/;
+
+  // Check for pre-release pattern and return formatted string
+  const preReleaseMatch = preReleasePattern.exec(text);
+  if (preReleaseMatch) {
+    return `pre-release:${preReleaseMatch[1]}`; // Return in the format pre-release:<flag>
+  }
 
   return (
     keywords.find(
@@ -49,7 +56,7 @@ function getVersionKeyword(
         (fullMatch && text === keyword) || text.includes(`[${keyword}]`)
     ) || null
   );
-}
+} 
 
 async function fetchVersionFromLatestCommitPR(): Promise<{ prDetails?: any, commitMessage?: string }> {
   const githubToken = process.env.GITHUB_TOKEN;
@@ -187,7 +194,12 @@ const run = async (
   }
 
   if (version) {
-    tagArgs.push(`--${version}`); // Ensure version is prefixed with '--'
+    if (version.startsWith("pre-release:")) {
+      const preReleaseFlag = version.split(":")[1]; // Extract the flag after 'pre-release:'
+      tagArgs.push('--pre-release', preReleaseFlag); // Append pre-release flag
+    } else {
+      tagArgs.push(`--${version}`); // Ensure version is prefixed with '--'
+    }
   }
 
   if (persist) {

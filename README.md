@@ -27,15 +27,15 @@ Specify the version tag for your components using the following methods. You can
 
 When using with `bit-tasks/pull-request@v2` and `bit-tasks/tag-export@v2`, component-specific version labels (e.g., `org.scope/component@minor`) take precedence over general PR labels or commit messages. These labels can be:
 - Auto-generated as `component-id@auto`
-- Manually modified to force specific versions: `@patch`, `@minor`, or `@major`
+- Manually modified to force specific versions: `@patch`, `@minor`, `@major`, or `pre-release:<flag>` (e.g., `pre-release:beta`)
 
 **Note:** Component version labels support requires both `bit-tasks/pull-request@v2` and `bit-tasks/tag-export@v2` or higher versions.
 
 ### Git Commit
 
-**Title:** Incorporate the version keyword in the title of your Git commit message.
+**Title:** Incorporate the version keyword in the title of your Git commit message. You can specify a pre-release version by using the format `pre-release:<flag>` in your commit message or pull request title.
 
-**Note:** The version based on the latest commit title.
+**Note:** The version is based on the latest commit title.
 
 ## Example usage
 
