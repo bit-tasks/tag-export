@@ -11024,15 +11024,17 @@ function getOverridenVersions(labels) {
         return '';
     const versionPattern = /@(major|minor|patch|auto)$/;
     return labels
-        .map(label => label.name)
-        .filter(name => versionPattern.test(name))
-        .map(name => {
-        if (name.endsWith('@auto')) {
-            return `"${name.replace('@auto', '')}"`;
+        .filter(label => versionPattern.test(label.name)) // Filter labels matching the version pattern
+        .map(label => {
+        if (label.name.endsWith('@auto')) {
+            return `"${label.description}"`; // Return only the componentId from description
         }
-        return `"${name}"`;
+        else {
+            const version = label.name.split('@').pop(); // Get the version part (major, minor, patch)
+            return `"${label.description}@${version}"`; // Return componentId@<version>
+        }
     })
-        .join(' ');
+        .join(' '); // Join the results with spaces
 }
 function removeVersionLabels(prDetails, prNumber, githubToken) {
     return __awaiter(this, void 0, void 0, function* () {
