@@ -10946,11 +10946,13 @@ const getLastMergedPullRequest = (octokit, owner, repo) => __awaiter(void 0, voi
         direction: "desc",
     });
     const lastMergedPR = pullRequests.find((pr) => pr.merged_at !== null);
-    return lastMergedPR ? {
-        number: lastMergedPR.number,
-        title: lastMergedPR.title,
-        labels: lastMergedPR.labels
-    } : undefined;
+    return lastMergedPR
+        ? {
+            number: lastMergedPR.number,
+            title: lastMergedPR.title,
+            labels: lastMergedPR.labels,
+        }
+        : undefined;
 });
 const createTagMessageText = (prTitle, commits) => __awaiter(void 0, void 0, void 0, function* () {
     let messageText = "CI";
@@ -11011,7 +11013,7 @@ function fetchVersionFromLatestCommitPR() {
     });
 }
 function getVersionFromLabel(labels) {
-    return (labels === null || labels === void 0 ? void 0 : labels.map(label => getVersionKeyword(label.name, true)).find(v => v)) || null;
+    return ((labels === null || labels === void 0 ? void 0 : labels.map((label) => getVersionKeyword(label.name, true)).find((v) => v)) || null);
 }
 function getVersionFromPRTitle(title) {
     return title ? getVersionKeyword(title) : null;
@@ -11021,21 +11023,15 @@ function getVersionFromCommitTitle(message) {
 }
 function getOverridenVersions(labels) {
     if (!labels)
-        return '';
-    const versionPattern = /@(major|minor|patch|auto)$/;
-    // Filter and process matching labels
-    const processedLabels = labels
-        .filter(label => versionPattern.test(label.name)) // Filter labels matching the version pattern
-        .map(label => {
-        if (label.name.endsWith('@auto')) {
-            return label.description; // Return only the componentId from description
-        }
-        else {
-            const version = label.name.split('@').pop(); // Get the version part (major, minor, patch)
-            return `${label.description}@${version}`; // Return componentId@<version>
-        }
-    });
-    return `"${processedLabels.join(', ')}"`;
+        return "";
+    const versionPattern = /@(major|minor|patch)$/;
+    return labels
+        .filter((label) => versionPattern.test(label.name)) // Filter labels matching the version pattern
+        .map((label) => {
+        const version = label.name.split("@").pop(); // Get the version part (major, minor, patch)
+        return `"${label.description}@${version}"`; // Return componentId@<version>
+    })
+        .join(" "); // Join the results with spaces
 }
 function removeVersionLabels(prDetails, prNumber, githubToken) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -11052,7 +11048,7 @@ function removeVersionLabels(prDetails, prNumber, githubToken) {
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
                     issue_number: prNumber,
-                    name: label
+                    name: label,
                 });
             }
         }
@@ -11062,7 +11058,7 @@ const getCommits = (octokit, owner, repo, pullNumber) => __awaiter(void 0, void 
     const { data: commits } = yield octokit.rest.pulls.listCommits({
         owner,
         repo,
-        pull_number: pullNumber
+        pull_number: pullNumber,
     });
     return commits;
 });
@@ -11084,33 +11080,33 @@ const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, f
         globalArgs.push(`--log=${process.env.LOG}`);
     }
     // Build the tag command with global arguments and specific options
-    const tagArgs = ['tag', '-m', `"${tagMessageText}"`, ...globalArgs];
+    const tagArgs = ["tag", "-m", `"${tagMessageText}"`, ...globalArgs];
     if (process.env.RIPPLE !== "true") {
-        tagArgs.push('--build');
+        tagArgs.push("--build");
     }
     if (version) {
         if (version.startsWith("pre-release:")) {
             const preReleaseFlag = version.split(":")[1]; // Extract the flag after 'pre-release:'
-            tagArgs.push('--pre-release', preReleaseFlag); // Append pre-release flag
+            tagArgs.push("--pre-release", preReleaseFlag); // Append pre-release flag
         }
         else {
             tagArgs.push(`--${version}`); // Ensure version is prefixed with '--'
         }
     }
     if (persist) {
-        tagArgs.push('--persist');
+        tagArgs.push("--persist");
     }
     const overridenComponentVersions = getOverridenVersions(prDetails === null || prDetails === void 0 ? void 0 : prDetails.labels);
-    core.info('Overriden labels: ' + overridenComponentVersions);
+    core.info("Overriden labels: " + overridenComponentVersions);
     if (overridenComponentVersions) {
         tagArgs.push(overridenComponentVersions);
     }
-    core.info(`command: executing bit ${tagArgs.join(' ')}`);
-    yield (0, exec_1.exec)('bit', tagArgs, { cwd: wsdir });
+    core.info(`command: executing bit ${tagArgs.join(" ")}`);
+    yield (0, exec_1.exec)("bit", tagArgs, { cwd: wsdir });
     // Use the same global arguments for the export command
-    const exportArgs = ['export', ...globalArgs];
-    core.info(`command: executing bit ${exportArgs.join(' ')}`);
-    yield (0, exec_1.exec)('bit', exportArgs, { cwd: wsdir });
+    const exportArgs = ["export", ...globalArgs];
+    core.info(`command: executing bit ${exportArgs.join(" ")}`);
+    yield (0, exec_1.exec)("bit", exportArgs, { cwd: wsdir });
     if ((lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.labels) && lastMergedPR.number) {
         yield removeVersionLabels({ labels: lastMergedPR.labels }, lastMergedPR.number, githubToken);
     }
