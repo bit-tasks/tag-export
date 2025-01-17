@@ -20,7 +20,7 @@ This task executes `bit tag -m "CI" && bit export` inside the workspace director
 Specify the version tag for your components using the following methods. You can use any of these version keywords: `major`, `minor`, `patch`, and `pre-release`. 
 
 **Priority Order:**
-1. Component version labels added/modified by the pull-request task (when `version-label: true` is set)
+1. Component version labels added/modified by the pull-request task (when `version-labels: true` is set)
 2. Pull Request Labels
 3. Pull Request or Commit Title
 4. Default to `patch` version
