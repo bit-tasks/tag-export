@@ -116,18 +116,20 @@ function getOverridenVersions(labels?: any[]): string {
   if (!labels) return '';
   
   const versionPattern = /@(major|minor|patch|auto)$/;
-  
-  return labels
+
+  // Filter and process matching labels
+  const processedLabels = labels
     .filter(label => versionPattern.test(label.name)) // Filter labels matching the version pattern
     .map(label => {
       if (label.name.endsWith('@auto')) {
-        return `"${label.description}"`; // Return only the componentId from description
+        return label.description; // Return only the componentId from description
       } else {
         const version = label.name.split('@').pop(); // Get the version part (major, minor, patch)
-        return `"${label.description}@${version}"`; // Return componentId@<version>
+        return `${label.description}@${version}`; // Return componentId@<version>
       }
-    })
-    .join(' '); // Join the results with spaces
+    });
+
+  return `"${processedLabels.join(', ')}"`;
 }
 
 async function removeVersionLabels(prDetails: any, prNumber: number, githubToken: string) {
