@@ -11021,17 +11021,19 @@ function getVersionFromPRTitle(title) {
 function getVersionFromCommitTitle(message) {
     return message ? getVersionKeyword(message) : null;
 }
+/**
+ * @description Return an array of "componentId@<version>" without extra quotes.
+ */
 function getOverridenVersions(labels) {
     if (!labels)
-        return "";
+        return [];
     const versionPattern = /@(major|minor|patch)$/;
     return labels
-        .filter((label) => versionPattern.test(label.name)) // Filter labels matching the version pattern
+        .filter((label) => versionPattern.test(label.name))
         .map((label) => {
-        const version = label.name.split("@").pop(); // Get the version part (major, minor, patch)
-        return `"${label.description}@${version}"`; // Return componentId@<version>
-    })
-        .join(" "); // Join the results with spaces
+        const version = label.name.split("@").pop(); // get major / minor / patch
+        return `${label.description}@${version}`; // No extra quotes here
+    });
 }
 function removeVersionLabels(prDetails, prNumber, githubToken) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -11079,31 +11081,33 @@ const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, f
     if (process.env.LOG) {
         globalArgs.push(`--log=${process.env.LOG}`);
     }
-    // Build the tag command with global arguments and specific options
+    // Build the tag command
     const tagArgs = ["tag", "-m", `"${tagMessageText}"`, ...globalArgs];
     if (process.env.RIPPLE !== "true") {
         tagArgs.push("--build");
     }
     if (version) {
         if (version.startsWith("pre-release:")) {
-            const preReleaseFlag = version.split(":")[1]; // Extract the flag after 'pre-release:'
-            tagArgs.push("--pre-release", preReleaseFlag); // Append pre-release flag
+            const preReleaseFlag = version.split(":")[1]; // Extract flag after 'pre-release:'
+            tagArgs.push("--pre-release", preReleaseFlag);
         }
         else {
-            tagArgs.push(`--${version}`); // Ensure version is prefixed with '--'
+            tagArgs.push(`--${version}`); // e.g. --major / --minor / --patch
         }
     }
     if (persist) {
         tagArgs.push("--persist");
     }
+    // Get overridden versions as an array
     const overridenComponentVersions = getOverridenVersions(prDetails === null || prDetails === void 0 ? void 0 : prDetails.labels);
-    core.info("Overriden labels: " + overridenComponentVersions);
-    if (overridenComponentVersions) {
-        tagArgs.push(overridenComponentVersions);
+    core.info("Overriden labels: " + overridenComponentVersions.join(", "));
+    // Spread them into the command so each is its own argument
+    if (overridenComponentVersions.length > 0) {
+        tagArgs.push(...overridenComponentVersions);
     }
     core.info(`command: executing bit ${tagArgs.join(" ")}`);
     yield (0, exec_1.exec)("bit", tagArgs, { cwd: wsdir });
-    // Use the same global arguments for the export command
+    // Export command (reuse globalArgs)
     const exportArgs = ["export", ...globalArgs];
     core.info(`command: executing bit ${exportArgs.join(" ")}`);
     yield (0, exec_1.exec)("bit", exportArgs, { cwd: wsdir });

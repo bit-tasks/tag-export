@@ -17,19 +17,19 @@ This task executes `bit tag -m "CI" && bit export` inside the workspace director
 
 ## Tag version
 
-Specify the version tag for your components using the following methods. You can use any of these version keywords: `major`, `minor`, `patch`, and `pre-release`. 
+Specify the version tag for your components using the following methods. You can use any of these version keywords: `major`, `minor`, `patch`, and `pre-release`. Component version labels support requires both `bit-tasks/pull-request@v2` and `bit-tasks/tag-export@v2` or higher versions.
 
 **Priority Order:**
-1. Component version labels added/modified by the pull-request task (when `version-labels: true` is set)
-2. Pull Request Labels
-3. Pull Request or Commit Title
-4. Default to `patch` version
+1. Component version labels added or modified by the pull-request task (when `version-labels: true` is set).
+2. Pull Request Labels.
+3. Pull Request or commit title (**deprecated**).
+4. Defaults to `patch` version.
 
-When using with `bit-tasks/pull-request@v2` and `bit-tasks/tag-export@v2`, component-specific version labels (e.g., `org.scope/component@minor`) take precedence over general PR labels or commit messages. These labels can be:
-- Auto-generated as `component-id@auto`
-- Manually modified to force specific versions: `@patch`, `@minor`, `@major`, or `pre-release:<flag>` (e.g., `pre-release:beta`)
+### Global Version Overrides
 
-**Note:** Component version labels support requires both `bit-tasks/pull-request@v2` and `bit-tasks/tag-export@v2` or higher versions.
+You can create global version labels by adding the label directly enclosed within square brackets (e.g., `[major]`). Supported global version keywords are: `[major]`, `[minor]`, `[patch]`, and `pre-release:<flag>` (e.g., `pre-release:beta`).
+
+**Note:** When a global override label is added, component-specific version labels are no longer automatically added to the Pull Request. However, these labels are still created at the repository level, allowing you to manually add them to the Pull Request if needed to override specific component versions. If you are creating any component label manually, ensure that both the component version (`component-name@<version>`) and the complete component ID (`org.scope/<component-id>`, e.g., `bit-tasks.test-scope/ui/hello-world`) are added as the `name` and `description` of the Pull Request label.
 
 ### Git Commit
 
