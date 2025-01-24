@@ -1,7 +1,7 @@
 import { getHelloWorld } from '@bit-tasks/test-scope.get-hello-world';
 
 /**
- * renders a "hello world" text 23
+ * renders a "hello world" text 22
  */
 
 export function HelloWorld() {
