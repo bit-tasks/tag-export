@@ -29,7 +29,7 @@ Specify the version tag for your components using the following methods. You can
 
 You can create global version labels by adding the label directly enclosed within square brackets (e.g., `[major]`). Supported global version keywords are: `[major]`, `[minor]`, `[patch]`, and `pre-release:<flag>` (e.g., `pre-release:beta`).
 
-**Note:** When a global override label is added, component-specific version labels are no longer automatically added to the Pull Request. However, these labels are still created at the repository level, allowing you to manually add them to the Pull Request if needed to override specific component versions. If you are creating any component label manually, ensure that both the component version (`component-name@<version>`) and the complete component ID (`org.scope/<component-id>`, e.g., `bit-tasks.test-scope/ui/hello-world`) are added as the `name` and `description` of the Pull Request label.
+**Note:** The component labels are created at the repository level, allowing you to manually add them to the Pull Request if needed to override specific component versions. If you are creating any component label manually, ensure that both the component version (`component-name@<version>`) and the complete component ID (`org.scope/<component-id>`, e.g., `bit-tasks.test-scope/ui/hello-world`) are added as the `name` and `description` of the Pull Request label.
 
 ### Git Commit
 

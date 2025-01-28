@@ -23,4 +23,6 @@ jobs:
         uses: bit-tasks/pull-request@main
         with:
           version-labels: true
-          version-labels-color: 'C2E0C6'
+          # version-labels-color-major: 'C2E0C6'
+          # version-labels-color-minor: 'C2E0C6'
+          # version-labels-color-patch: 'C2E0C6'
