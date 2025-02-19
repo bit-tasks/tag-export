@@ -25,21 +25,6 @@ const getLastMergedPullRequest = async (
     : undefined;
 };
 
-const createTagMessageText = async (prTitle?: string, commits?: any[]) => {
-  let messageText = "CI";
-  core.info("PR title: " + prTitle);
-
-  if (prTitle) {
-    messageText = prTitle;
-  } else if (commits?.length) {
-    messageText = commits[commits.length - 1].commit.message;
-    core.info("Last commit message: " + messageText);
-  }
-
-  core.info("Tag message Text: " + messageText);
-  return messageText;
-};
-
 function getVersionKeyword(
   text: string,
   fullMatch: boolean = false
@@ -61,51 +46,6 @@ function getVersionKeyword(
   );
 }
 
-async function fetchVersionFromLatestCommitPR(): Promise<{
-  prDetails?: any;
-  commitMessage?: string;
-}> {
-  const githubToken = process.env.GITHUB_TOKEN;
-  if (!githubToken) {
-    throw new Error("GitHub token not found");
-  }
-  const octokit = getOctokit(githubToken);
-
-  const { repo, ref } = context;
-  const branch = ref.replace("refs/heads/", "");
-
-  const { data: commit } = await octokit.rest.repos.getCommit({
-    owner: repo.owner,
-    repo: repo.repo,
-    ref: branch,
-  });
-
-  const commitMessage = commit?.commit?.message;
-  core.info("Commit Message: " + commitMessage);
-
-  if (!repo || !commitMessage) {
-    core.info("Repo information or commit message is not available.");
-    return { commitMessage };
-  }
-
-  const prNumberMatch = /Merge pull request #(\d+)/.exec(commitMessage);
-  if (prNumberMatch) {
-    const prNumber = prNumberMatch[1];
-    core.info("PR Number: " + prNumber);
-    const {
-      data: { title, labels },
-    } = await octokit.rest.pulls.get({
-      owner: repo.owner,
-      repo: repo.repo,
-      pull_number: parseInt(prNumber, 10),
-    });
-
-    return { prDetails: { title, labels }, commitMessage };
-  }
-
-  return { commitMessage };
-}
-
 function getVersionFromLabel(labels?: any[]): string | null {
   return (
     labels
@@ -116,10 +56,6 @@ function getVersionFromLabel(labels?: any[]): string | null {
 
 function getVersionFromPRTitle(title?: string): string | null {
   return title ? getVersionKeyword(title) : null;
-}
-
-function getVersionFromCommitTitle(message?: string): string | null {
-  return message ? getVersionKeyword(message) : null;
 }
 
 /**
@@ -163,38 +99,15 @@ async function removeVersionLabels(
   }
 }
 
-const getCommits = async (
-  octokit: any,
-  owner: string,
-  repo: string,
-  pullNumber: number
-) => {
-  const { data: commits } = await octokit.rest.pulls.listCommits({
-    owner,
-    repo,
-    pull_number: pullNumber,
-  });
-  return commits;
-};
-
 const run = async (githubToken: string, wsdir: string, persist: boolean) => {
-  const { prDetails, commitMessage } = await fetchVersionFromLatestCommitPR();
-  const version =
-    getVersionFromLabel(prDetails?.labels) ||
-    getVersionFromPRTitle(prDetails?.title) ||
-    getVersionFromCommitTitle(commitMessage);
-
-  const { repo, owner } = context?.repo;
+const { repo, owner } = context?.repo;
   const octokit = getOctokit(githubToken);
   const lastMergedPR = await getLastMergedPullRequest(octokit, owner, repo);
+  const version =
+    getVersionFromLabel(lastMergedPR?.labels) ||
+    getVersionFromPRTitle(lastMergedPR?.title);
 
-  const commits = lastMergedPR?.number
-    ? await getCommits(octokit, owner, repo, lastMergedPR.number)
-    : undefined;
-  const tagMessageText = await createTagMessageText(
-    lastMergedPR?.title,
-    commits
-  );
+  const tagMessageText = lastMergedPR?.title;
 
   // Define global arguments for logging if applicable
   const globalArgs: string[] = [];
@@ -223,7 +136,7 @@ const run = async (githubToken: string, wsdir: string, persist: boolean) => {
   }
 
   // Get overridden versions as an array
-  const overridenComponentVersions = getOverridenVersions(prDetails?.labels);
+  const overridenComponentVersions = getOverridenVersions(lastMergedPR?.labels);
   core.info("Overriden labels: " + overridenComponentVersions.join(", "));
 
   // Spread them into the command so each is its own argument

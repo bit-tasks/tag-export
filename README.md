@@ -22,7 +22,6 @@ Specify the version tag for your components using the following methods. You can
 **Priority Order:**
 1. Component version labels added or modified by the pull-request task (when `version-labels: true` is set).
 2. Pull Request Labels.
-3. Pull Request or commit title (**deprecated**).
 4. Defaults to `patch` version.
 
 ### Global Version Overrides
@@ -31,9 +30,8 @@ You can create global version labels by adding the label directly enclosed withi
 
 **Note:** The component labels are created at the repository level, allowing you to manually add them to the Pull Request if needed to override specific component versions. If you are creating any component label manually, ensure that both the component version (`component-name@<version>`) and the complete component ID (`org.scope/<component-id>`, e.g., `bit-tasks.test-scope/ui/hello-world`) are added as the `name` and `description` of the Pull Request label.
 
-### Git Commit
-
-**Title:** Incorporate the version keyword in the title of your Git commit message. You can specify a pre-release version by using the format `pre-release:<flag>` in your commit message or pull request title.
+### Pre-release Tag
+ You can specify a pre-release version by using the format `pre-release:<flag>` in your commit message or pull request title.
 
 **Note:** The version is based on the latest commit title.
 

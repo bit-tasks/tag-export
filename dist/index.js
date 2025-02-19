@@ -10954,19 +10954,6 @@ const getLastMergedPullRequest = (octokit, owner, repo) => __awaiter(void 0, voi
         }
         : undefined;
 });
-const createTagMessageText = (prTitle, commits) => __awaiter(void 0, void 0, void 0, function* () {
-    let messageText = "CI";
-    core.info("PR title: " + prTitle);
-    if (prTitle) {
-        messageText = prTitle;
-    }
-    else if (commits === null || commits === void 0 ? void 0 : commits.length) {
-        messageText = commits[commits.length - 1].commit.message;
-        core.info("Last commit message: " + messageText);
-    }
-    core.info("Tag message Text: " + messageText);
-    return messageText;
-});
 function getVersionKeyword(text, fullMatch = false) {
     const keywords = ["patch", "major", "minor"];
     const preReleasePattern = /\[pre-release:(.+?)\]/;
@@ -10977,49 +10964,11 @@ function getVersionKeyword(text, fullMatch = false) {
     }
     return (keywords.find((keyword) => (fullMatch && text === keyword) || text.includes(`[${keyword}]`)) || null);
 }
-function fetchVersionFromLatestCommitPR() {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        const githubToken = process.env.GITHUB_TOKEN;
-        if (!githubToken) {
-            throw new Error("GitHub token not found");
-        }
-        const octokit = (0, github_1.getOctokit)(githubToken);
-        const { repo, ref } = github_1.context;
-        const branch = ref.replace("refs/heads/", "");
-        const { data: commit } = yield octokit.rest.repos.getCommit({
-            owner: repo.owner,
-            repo: repo.repo,
-            ref: branch,
-        });
-        const commitMessage = (_a = commit === null || commit === void 0 ? void 0 : commit.commit) === null || _a === void 0 ? void 0 : _a.message;
-        core.info("Commit Message: " + commitMessage);
-        if (!repo || !commitMessage) {
-            core.info("Repo information or commit message is not available.");
-            return { commitMessage };
-        }
-        const prNumberMatch = /Merge pull request #(\d+)/.exec(commitMessage);
-        if (prNumberMatch) {
-            const prNumber = prNumberMatch[1];
-            core.info("PR Number: " + prNumber);
-            const { data: { title, labels }, } = yield octokit.rest.pulls.get({
-                owner: repo.owner,
-                repo: repo.repo,
-                pull_number: parseInt(prNumber, 10),
-            });
-            return { prDetails: { title, labels }, commitMessage };
-        }
-        return { commitMessage };
-    });
-}
 function getVersionFromLabel(labels) {
     return ((labels === null || labels === void 0 ? void 0 : labels.map((label) => getVersionKeyword(label.name, true)).find((v) => v)) || null);
 }
 function getVersionFromPRTitle(title) {
     return title ? getVersionKeyword(title) : null;
-}
-function getVersionFromCommitTitle(message) {
-    return message ? getVersionKeyword(message) : null;
 }
 /**
  * @description Return an array of "componentId@<version>" without extra quotes.
@@ -11056,26 +11005,13 @@ function removeVersionLabels(prDetails, prNumber, githubToken) {
         }
     });
 }
-const getCommits = (octokit, owner, repo, pullNumber) => __awaiter(void 0, void 0, void 0, function* () {
-    const { data: commits } = yield octokit.rest.pulls.listCommits({
-        owner,
-        repo,
-        pull_number: pullNumber,
-    });
-    return commits;
-});
 const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, function* () {
-    const { prDetails, commitMessage } = yield fetchVersionFromLatestCommitPR();
-    const version = getVersionFromLabel(prDetails === null || prDetails === void 0 ? void 0 : prDetails.labels) ||
-        getVersionFromPRTitle(prDetails === null || prDetails === void 0 ? void 0 : prDetails.title) ||
-        getVersionFromCommitTitle(commitMessage);
     const { repo, owner } = github_1.context === null || github_1.context === void 0 ? void 0 : github_1.context.repo;
     const octokit = (0, github_1.getOctokit)(githubToken);
     const lastMergedPR = yield getLastMergedPullRequest(octokit, owner, repo);
-    const commits = (lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.number)
-        ? yield getCommits(octokit, owner, repo, lastMergedPR.number)
-        : undefined;
-    const tagMessageText = yield createTagMessageText(lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.title, commits);
+    const version = getVersionFromLabel(lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.labels) ||
+        getVersionFromPRTitle(lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.title);
+    const tagMessageText = lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.title;
     // Define global arguments for logging if applicable
     const globalArgs = [];
     if (process.env.LOG) {
@@ -11099,7 +11035,7 @@ const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, f
         tagArgs.push("--persist");
     }
     // Get overridden versions as an array
-    const overridenComponentVersions = getOverridenVersions(prDetails === null || prDetails === void 0 ? void 0 : prDetails.labels);
+    const overridenComponentVersions = getOverridenVersions(lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.labels);
     core.info("Overriden labels: " + overridenComponentVersions.join(", "));
     // Spread them into the command so each is its own argument
     if (overridenComponentVersions.length > 0) {
