@@ -73,32 +73,6 @@ function getOverridenVersions(labels?: any[]): string[] {
     });
 }
 
-async function removeVersionLabels(
-  prDetails: any,
-  prNumber: number,
-  githubToken: string
-) {
-  if (!prDetails?.labels) return;
-
-  const octokit = getOctokit(githubToken);
-  const versionPattern = /@(major|minor|patch|auto)$/;
-
-  const labelsToRemove = prDetails.labels
-    .filter((label: { name: string }) => versionPattern.test(label.name))
-    .map((label: { name: string }) => label.name);
-
-  if (labelsToRemove.length > 0) {
-    for (const label of labelsToRemove) {
-      await octokit.rest.issues.removeLabel({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        issue_number: prNumber,
-        name: label,
-      });
-    }
-  }
-}
-
 const run = async (githubToken: string, wsdir: string, persist: boolean) => {
 const { repo, owner } = context?.repo;
   const octokit = getOctokit(githubToken);
@@ -152,13 +126,6 @@ const { repo, owner } = context?.repo;
   core.info(`command: executing bit ${exportArgs.join(" ")}`);
   await exec("bit", exportArgs, { cwd: wsdir });
 
-  if (lastMergedPR?.labels && lastMergedPR.number) {
-    await removeVersionLabels(
-      { labels: lastMergedPR.labels },
-      lastMergedPR.number,
-      githubToken
-    );
-  }
 };
 
 export default run;

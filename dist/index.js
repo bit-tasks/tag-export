@@ -10984,27 +10984,6 @@ function getOverridenVersions(labels) {
         return `${label.description}@${version}`; // No extra quotes here
     });
 }
-function removeVersionLabels(prDetails, prNumber, githubToken) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!(prDetails === null || prDetails === void 0 ? void 0 : prDetails.labels))
-            return;
-        const octokit = (0, github_1.getOctokit)(githubToken);
-        const versionPattern = /@(major|minor|patch|auto)$/;
-        const labelsToRemove = prDetails.labels
-            .filter((label) => versionPattern.test(label.name))
-            .map((label) => label.name);
-        if (labelsToRemove.length > 0) {
-            for (const label of labelsToRemove) {
-                yield octokit.rest.issues.removeLabel({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    issue_number: prNumber,
-                    name: label,
-                });
-            }
-        }
-    });
-}
 const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, function* () {
     const { repo, owner } = github_1.context === null || github_1.context === void 0 ? void 0 : github_1.context.repo;
     const octokit = (0, github_1.getOctokit)(githubToken);
@@ -11047,9 +11026,6 @@ const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, f
     const exportArgs = ["export", ...globalArgs];
     core.info(`command: executing bit ${exportArgs.join(" ")}`);
     yield (0, exec_1.exec)("bit", exportArgs, { cwd: wsdir });
-    if ((lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.labels) && lastMergedPR.number) {
-        yield removeVersionLabels({ labels: lastMergedPR.labels }, lastMergedPR.number, githubToken);
-    }
 });
 exports["default"] = run;
 
