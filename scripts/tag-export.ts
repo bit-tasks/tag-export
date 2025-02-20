@@ -77,6 +77,9 @@ const run = async (githubToken: string, wsdir: string, persist: boolean) => {
 const { repo, owner } = context?.repo;
   const octokit = getOctokit(githubToken);
   const lastMergedPR = await getLastMergedPullRequest(octokit, owner, repo);
+  core.info("Pull Request Number: " + lastMergedPR?.number);
+  core.info("Pull Request Total Label Count: " + lastMergedPR?.labels.length);
+  
   const version =
     getVersionFromLabel(lastMergedPR?.labels) ||
     getVersionFromPRTitle(lastMergedPR?.title);

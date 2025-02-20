@@ -10988,6 +10988,8 @@ const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, f
     const { repo, owner } = github_1.context === null || github_1.context === void 0 ? void 0 : github_1.context.repo;
     const octokit = (0, github_1.getOctokit)(githubToken);
     const lastMergedPR = yield getLastMergedPullRequest(octokit, owner, repo);
+    core.info("Pull Request Number: " + (lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.number));
+    core.info("Pull Request Total Label Count: " + (lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.labels.length));
     const version = getVersionFromLabel(lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.labels) ||
         getVersionFromPRTitle(lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.title);
     const tagMessageText = lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.title;
