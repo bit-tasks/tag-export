@@ -10954,7 +10954,7 @@ const getLastMergedPullRequest = (octokit, owner, repo) => __awaiter(void 0, voi
         }
         : undefined;
 });
-function getVersionKeyword(text, fullMatch = false) {
+function getVersionKeyword(text) {
     const keywords = ["patch", "major", "minor"];
     const preReleasePattern = /\[pre-release:(.+?)\]/;
     // Check for pre-release pattern and return formatted string
@@ -10962,10 +10962,10 @@ function getVersionKeyword(text, fullMatch = false) {
     if (preReleaseMatch) {
         return `pre-release:${preReleaseMatch[1]}`; // Return in the format pre-release:<flag>
     }
-    return (keywords.find((keyword) => (fullMatch && text === keyword) || text.includes(`[${keyword}]`)) || null);
+    return (keywords.find((keyword) => text.includes(`[${keyword}]`)) || null);
 }
 function getVersionFromLabel(labels) {
-    return ((labels === null || labels === void 0 ? void 0 : labels.map((label) => getVersionKeyword(label.name, true)).find((v) => v)) || null);
+    return ((labels === null || labels === void 0 ? void 0 : labels.map((label) => getVersionKeyword(label.name)).find((v) => v)) || null);
 }
 function getVersionFromPRTitle(title) {
     return title ? getVersionKeyword(title) : null;
@@ -10990,7 +10990,7 @@ const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, f
     const lastMergedPR = yield getLastMergedPullRequest(octokit, owner, repo);
     core.info("Pull Request Number: " + (lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.number));
     core.info("Pull Request Total Label Count: " + (lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.labels.length));
-    const version = getVersionFromLabel(lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.labels) ||
+    const globalVersion = getVersionFromLabel(lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.labels) ||
         getVersionFromPRTitle(lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.title);
     const tagMessageText = lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.title;
     // Define global arguments for logging if applicable
@@ -11003,13 +11003,13 @@ const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, f
     if (process.env.RIPPLE !== "true") {
         tagArgs.push("--build");
     }
-    if (version) {
-        if (version.startsWith("pre-release:")) {
-            const preReleaseFlag = version.split(":")[1]; // Extract flag after 'pre-release:'
+    if (globalVersion) {
+        if (globalVersion.startsWith("pre-release:")) {
+            const preReleaseFlag = globalVersion.split(":")[1]; // Extract flag after 'pre-release:'
             tagArgs.push("--pre-release", preReleaseFlag);
         }
         else {
-            tagArgs.push(`--${version}`); // e.g. --major / --minor / --patch
+            tagArgs.push(`--${globalVersion}`); // e.g. --major / --minor / --patch
         }
     }
     if (persist) {

@@ -26,8 +26,7 @@ const getLastMergedPullRequest = async (
 };
 
 function getVersionKeyword(
-  text: string,
-  fullMatch: boolean = false
+  text: string
 ): string | null {
   const keywords = ["patch", "major", "minor"];
   const preReleasePattern = /\[pre-release:(.+?)\]/;
@@ -40,8 +39,7 @@ function getVersionKeyword(
 
   return (
     keywords.find(
-      (keyword) =>
-        (fullMatch && text === keyword) || text.includes(`[${keyword}]`)
+      (keyword) => text.includes(`[${keyword}]`)
     ) || null
   );
 }
@@ -49,7 +47,7 @@ function getVersionKeyword(
 function getVersionFromLabel(labels?: any[]): string | null {
   return (
     labels
-      ?.map((label) => getVersionKeyword(label.name, true))
+      ?.map((label) => getVersionKeyword(label.name))
       .find((v) => v) || null
   );
 }
@@ -79,8 +77,8 @@ const { repo, owner } = context?.repo;
   const lastMergedPR = await getLastMergedPullRequest(octokit, owner, repo);
   core.info("Pull Request Number: " + lastMergedPR?.number);
   core.info("Pull Request Total Label Count: " + lastMergedPR?.labels.length);
-  
-  const version =
+
+  const globalVersion =
     getVersionFromLabel(lastMergedPR?.labels) ||
     getVersionFromPRTitle(lastMergedPR?.title);
 
@@ -99,12 +97,12 @@ const { repo, owner } = context?.repo;
     tagArgs.push("--build");
   }
 
-  if (version) {
-    if (version.startsWith("pre-release:")) {
-      const preReleaseFlag = version.split(":")[1]; // Extract flag after 'pre-release:'
+  if (globalVersion) {
+    if (globalVersion.startsWith("pre-release:")) {
+      const preReleaseFlag = globalVersion.split(":")[1]; // Extract flag after 'pre-release:'
       tagArgs.push("--pre-release", preReleaseFlag);
     } else {
-      tagArgs.push(`--${version}`); // e.g. --major / --minor / --patch
+      tagArgs.push(`--${globalVersion}`); // e.g. --major / --minor / --patch
     }
   }
 
