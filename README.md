@@ -21,7 +21,7 @@ Specify the version tag for your components using the following methods. You can
 
 **Priority Order:**
 1. Component version labels added or modified by the pull-request task (when `version-labels: true` is set).
-2. Pull Request Labels.
+2. Global version labels `[major]`, `[minor]` and `[patch]` can be added to the Pull Request. **Optional:** You can also add these labels to the Pull Request title e.g "Update about component `[manoj]`.
 4. Defaults to `patch` version.
 
 ### Global Version Overrides
