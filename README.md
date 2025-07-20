@@ -3,7 +3,9 @@ Big Tag and Export to Remote Scope
 
 # GitHub Actions
 
-This task executes `bit tag -m "CI" && bit export` inside the workspace directory.
+This task executes `bit ci merge` inside the workspace directory.
+
+*Important*: `bit-tasks/tag-export@v3` requires Bit version `^1.11.42`, if you need to use a lower version, use `bit-tasks/tag-export@v2`.
 
 ## Inputs
 
@@ -113,7 +115,7 @@ jobs:
         with:
           ws-dir: '<WORKSPACE_DIR_PATH>'
       - name: Bit Tag and Export
-        uses: bit-tasks/tag-export@v2
+        uses: bit-tasks/tag-export@v3
         with:
           persist: 'false' # Set to 'true' if you use the soft tag flow
 ```
