@@ -10,6 +10,29 @@ inputs:
   persist:
     description: "Persist soft tagged components"
     required: false
+  build:
+    description: "Build the components"
+    required: false
+  strict:
+    description: "Strict mode"
+    required: false
+  increment:
+    description: "Type of increment"
+    required: false
+    options:
+      - major
+      - premajor
+      - minor
+      - preminor
+      - patch
+      - prepatch
+      - prerelease
+  prerelease-id:
+    description: "Pre-release identifier"
+    required: false
+  increment-by:
+    description: "Increment by"
+    required: false
 runs:
   using: 'node20'
   main: 'dist/index.js'

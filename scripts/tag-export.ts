@@ -18,10 +18,10 @@ const getLastMergedPullRequest = async (
   const lastMergedPR = pullRequests.find((pr: any) => pr.merged_at !== null);
   return lastMergedPR
     ? {
-        number: lastMergedPR.number,
-        title: lastMergedPR.title,
-        labels: lastMergedPR.labels,
-      }
+      number: lastMergedPR.number,
+      title: lastMergedPR.title,
+      labels: lastMergedPR.labels,
+    }
     : undefined;
 };
 
@@ -56,23 +56,8 @@ function getVersionFromPRTitle(title?: string): string | null {
   return title ? getVersionKeyword(title) : null;
 }
 
-/**
- * @description Return an array of "componentId@<version>" without extra quotes.
- */
-function getOverridenVersions(labels?: any[]): string[] {
-  if (!labels) return [];
-  const versionPattern = /@(major|minor|patch)$/;
-
-  return labels
-    .filter((label: { name: string }) => versionPattern.test(label.name))
-    .map((label: { name: string; description: string }) => {
-      const version = label.name.split("@").pop(); // get major / minor / patch
-      return `${label.description}@${version}`; // No extra quotes here
-    });
-}
-
-const run = async (githubToken: string, wsdir: string, persist: boolean) => {
-const { repo, owner } = context?.repo;
+const run = async (githubToken: string, wsdir: string, persist: boolean, build: boolean, increment: string, prereleaseId: string, incrementBy: number, strict: boolean) => {
+  const { repo, owner } = context?.repo;
   const octokit = getOctokit(githubToken);
   const lastMergedPR = await getLastMergedPullRequest(octokit, owner, repo);
   core.info("Pull Request Number: " + lastMergedPR?.number);
@@ -91,41 +76,48 @@ const { repo, owner } = context?.repo;
   }
 
   // Build the tag command
-  const tagArgs = ["tag", "-m", `"${tagMessageText}"`, ...globalArgs];
+  const mergeArgs = ["ci", "merge", "-m", `"${tagMessageText}"`, ...globalArgs];
 
-  if (process.env.RIPPLE !== "true") {
-    tagArgs.push("--build");
+  if (build) {
+    mergeArgs.push("--build");
+  }
+
+  if (incrementBy) {
+    mergeArgs.push(`--increment-by`, incrementBy.toString());
+  }
+
+  if (strict) {
+    mergeArgs.push("--strict");
   }
 
   if (globalVersion) {
     if (globalVersion.startsWith("pre-release:")) {
       const preReleaseFlag = globalVersion.split(":")[1]; // Extract flag after 'pre-release:'
-      tagArgs.push("--pre-release", preReleaseFlag);
+      mergeArgs.push("--prerelease-id", preReleaseFlag);
     } else {
-      tagArgs.push(`--${globalVersion}`); // e.g. --major / --minor / --patch
+      mergeArgs.push(`--${globalVersion}`); // e.g. --major / --minor / --patch
+    }
+  } else {
+    if (increment) {
+      mergeArgs.push(`--increment`, increment);
+    }
+
+    if (prereleaseId) {
+      mergeArgs.push(`--prerelease-id`, prereleaseId);
     }
   }
 
   if (persist) {
-    tagArgs.push("--persist");
+    mergeArgs.push("--persist");
   }
 
-  // Get overridden versions as an array
-  const overridenComponentVersions = getOverridenVersions(lastMergedPR?.labels);
-  core.info("Overriden labels: " + overridenComponentVersions.join(", "));
-
-  // Spread them into the command so each is its own argument
-  if (overridenComponentVersions.length > 0) {
-    tagArgs.push(...overridenComponentVersions);
-  }
-
-  core.info(`command: executing bit ${tagArgs.join(" ")}`);
-  await exec("bit", tagArgs, { cwd: wsdir });
-
-  // Export command (reuse globalArgs)
-  const exportArgs = ["export", ...globalArgs];
-  core.info(`command: executing bit ${exportArgs.join(" ")}`);
-  await exec("bit", exportArgs, { cwd: wsdir });
+  await exec("bit", mergeArgs, {
+    cwd: wsdir,
+    env: {
+      ...process.env,
+      BIT_DISABLE_SPINNER: "false",
+    },
+  });
 
 };
 

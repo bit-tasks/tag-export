@@ -10884,10 +10884,15 @@ try {
     const githubToken = process.env.GITHUB_TOKEN;
     const wsDir = core.getInput("ws-dir") || process.env.WSDIR || "./";
     const persist = core.getInput("persist") === "true" ? true : false;
+    const build = core.getInput("build") === "true" ? true : false;
+    const increment = core.getInput("increment");
+    const prereleaseId = core.getInput("prerelease-id");
+    const incrementBy = parseInt(core.getInput("increment-by"));
+    const strict = core.getInput("strict") === "true" ? true : false;
     if (!githubToken) {
         throw new Error("GitHub token not found");
     }
-    (0, tag_export_1.default)(githubToken, wsDir, persist);
+    (0, tag_export_1.default)(githubToken, wsDir, persist, build, increment, prereleaseId, incrementBy, strict);
 }
 catch (error) {
     core.setFailed(error.message);
@@ -10970,21 +10975,7 @@ function getVersionFromLabel(labels) {
 function getVersionFromPRTitle(title) {
     return title ? getVersionKeyword(title) : null;
 }
-/**
- * @description Return an array of "componentId@<version>" without extra quotes.
- */
-function getOverridenVersions(labels) {
-    if (!labels)
-        return [];
-    const versionPattern = /@(major|minor|patch)$/;
-    return labels
-        .filter((label) => versionPattern.test(label.name))
-        .map((label) => {
-        const version = label.name.split("@").pop(); // get major / minor / patch
-        return `${label.description}@${version}`; // No extra quotes here
-    });
-}
-const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, function* () {
+const run = (githubToken, wsdir, persist, build, increment, prereleaseId, incrementBy, strict) => __awaiter(void 0, void 0, void 0, function* () {
     const { repo, owner } = github_1.context === null || github_1.context === void 0 ? void 0 : github_1.context.repo;
     const octokit = (0, github_1.getOctokit)(githubToken);
     const lastMergedPR = yield getLastMergedPullRequest(octokit, owner, repo);
@@ -10999,35 +10990,40 @@ const run = (githubToken, wsdir, persist) => __awaiter(void 0, void 0, void 0, f
         globalArgs.push(`--log=${process.env.LOG}`);
     }
     // Build the tag command
-    const tagArgs = ["tag", "-m", `"${tagMessageText}"`, ...globalArgs];
-    if (process.env.RIPPLE !== "true") {
-        tagArgs.push("--build");
+    const mergeArgs = ["ci", "merge", "-m", `"${tagMessageText}"`, ...globalArgs];
+    if (build) {
+        mergeArgs.push("--build");
+    }
+    if (incrementBy) {
+        mergeArgs.push(`--increment-by`, incrementBy.toString());
+    }
+    if (strict) {
+        mergeArgs.push("--strict");
     }
     if (globalVersion) {
         if (globalVersion.startsWith("pre-release:")) {
             const preReleaseFlag = globalVersion.split(":")[1]; // Extract flag after 'pre-release:'
-            tagArgs.push("--pre-release", preReleaseFlag);
+            mergeArgs.push("--prerelease-id", preReleaseFlag);
         }
         else {
-            tagArgs.push(`--${globalVersion}`); // e.g. --major / --minor / --patch
+            mergeArgs.push(`--${globalVersion}`); // e.g. --major / --minor / --patch
+        }
+    }
+    else {
+        if (increment) {
+            mergeArgs.push(`--increment`, increment);
+        }
+        if (prereleaseId) {
+            mergeArgs.push(`--prerelease-id`, prereleaseId);
         }
     }
     if (persist) {
-        tagArgs.push("--persist");
+        mergeArgs.push("--persist");
     }
-    // Get overridden versions as an array
-    const overridenComponentVersions = getOverridenVersions(lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.labels);
-    core.info("Overriden labels: " + overridenComponentVersions.join(", "));
-    // Spread them into the command so each is its own argument
-    if (overridenComponentVersions.length > 0) {
-        tagArgs.push(...overridenComponentVersions);
-    }
-    core.info(`command: executing bit ${tagArgs.join(" ")}`);
-    yield (0, exec_1.exec)("bit", tagArgs, { cwd: wsdir });
-    // Export command (reuse globalArgs)
-    const exportArgs = ["export", ...globalArgs];
-    core.info(`command: executing bit ${exportArgs.join(" ")}`);
-    yield (0, exec_1.exec)("bit", exportArgs, { cwd: wsdir });
+    yield (0, exec_1.exec)("bit", mergeArgs, {
+        cwd: wsdir,
+        env: Object.assign(Object.assign({}, process.env), { BIT_DISABLE_SPINNER: "false" }),
+    });
 });
 exports["default"] = run;
 
