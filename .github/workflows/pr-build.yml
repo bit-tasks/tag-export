@@ -22,6 +22,7 @@ jobs:
       - name: Bit Pull Request
         uses: bit-tasks/pull-request@main
         with:
+          build: true
           version-labels: true
           # version-labels-color-major: 'C2E0C6'
           # version-labels-color-minor: 'C2E0C6'

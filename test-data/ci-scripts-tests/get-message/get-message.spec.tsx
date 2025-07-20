@@ -4,6 +4,6 @@ import { BasicGetMessage } from './get-message.composition.js';
 
 it('should render the correct text', () => {
   const { getByText } = render(<BasicGetMessage />);
-  const rendered = getByText('hello world!');
+  const rendered = getByText('hello world!!');
   expect(rendered).toBeTruthy();
 });
