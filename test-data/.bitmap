@@ -11,45 +11,24 @@
 {
     "get-message": {
         "name": "get-message",
-        "scope": "",
-        "version": "",
-        "defaultScope": "frontend.ci-scripts-tests",
+        "scope": "frontend.ci-scripts-tests",
+        "version": "0.0.1",
         "mainFile": "index.ts",
-        "rootDir": "ci-scripts-tests/get-message",
-        "config": {
-            "frontend.ci-scripts-tests/my-env": {},
-            "teambit.envs/envs": {
-                "env": "frontend.ci-scripts-tests/my-env"
-            }
-        }
+        "rootDir": "ci-scripts-tests/get-message"
     },
     "my-app": {
         "name": "my-app",
-        "scope": "",
-        "version": "",
-        "defaultScope": "frontend.ci-scripts-tests",
+        "scope": "frontend.ci-scripts-tests",
+        "version": "0.0.1",
         "mainFile": "index.ts",
-        "rootDir": "ci-scripts-tests/my-app",
-        "config": {
-            "frontend.ci-scripts-tests/my-env": {},
-            "teambit.envs/envs": {
-                "env": "frontend.ci-scripts-tests/my-env"
-            }
-        }
+        "rootDir": "ci-scripts-tests/my-app"
     },
     "my-env": {
         "name": "my-env",
-        "scope": "",
-        "version": "",
-        "defaultScope": "frontend.ci-scripts-tests",
+        "scope": "frontend.ci-scripts-tests",
+        "version": "0.0.1",
         "mainFile": "index.ts",
-        "rootDir": "ci-scripts-tests/my-env",
-        "config": {
-            "bitdev.general/envs/bit-env@3.0.4": {},
-            "teambit.envs/envs": {
-                "env": "bitdev.general/envs/bit-env"
-            }
-        }
+        "rootDir": "ci-scripts-tests/my-env"
     },
     "$schema-version": "17.0.0"
 }
