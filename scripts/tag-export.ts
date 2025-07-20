@@ -1,6 +1,7 @@
-import { exec } from "@actions/exec";
+import { exec, getExecOutput } from "@actions/exec";
 import { context, getOctokit } from "@actions/github";
 import * as core from "@actions/core";
+import semver from "semver";
 
 const getLastMergedPullRequest = async (
   octokit: any,
@@ -57,6 +58,16 @@ function getVersionFromPRTitle(title?: string): string | null {
 }
 
 const run = async (githubToken: string, wsdir: string, persist: boolean, build: boolean, increment: string, prereleaseId: string, incrementBy: number, strict: boolean) => {
+  const version = await getExecOutput("bit -v", [], { cwd: wsdir });
+
+  // If the version is lower than 1.11.42, throw an error recommending to downgrade the action version to v2
+  // or upgrade Bit to ^1.11.42
+  if (semver.lt(version.stdout.trim(), "1.11.42")) {
+    throw new Error(
+      "Bit version is lower than 1.11.42. Please downgrade the action version to v2, or upgrade Bit to ^1.11.42"
+    );
+  }
+
   const { repo, owner } = context?.repo;
   const octokit = getOctokit(githubToken);
   const lastMergedPR = await getLastMergedPullRequest(octokit, owner, repo);
