@@ -5,7 +5,7 @@ Big Tag and Export to Remote Scope
 
 This task executes `bit ci merge` inside the workspace directory.
 
-*Important*: `bit-tasks/tag-export@v3` requires Bit version `^1.11.42`, if you need to use a lower version, use `bit-tasks/tag-export@v2`.
+*Important*: `bit-tasks/tag-export@v3` requires Bit version `^1.12.45`, if you need to use a lower version, use `bit-tasks/tag-export@v2`.
 
 ## Inputs
 
