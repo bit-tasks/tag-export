@@ -4,6 +4,7 @@ import * as core from "@actions/core";
 import semver from "semver";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { tmpdir } from "node:os";
 
 const getLastMergedPullRequest = async (
   octokit: any,
@@ -151,9 +152,9 @@ const run = async (githubToken: string, wsdir: string, persist: boolean, build: 
       content += `${component}: ${version}\n`;
     });
 
-    await fs.writeFile(path.join(wsdir, 'versions.txt'), content);
+    await fs.writeFile(path.join(tmpdir(), 'versions.txt'), content);
 
-    mergeArgs.push("--versions-file", "versions.txt");
+    mergeArgs.push("--versions-file", path.relative(wsdir, path.join(tmpdir(), 'versions.txt')));
   }
 
   await exec("bit", mergeArgs, {

@@ -13644,6 +13644,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const semver_1 = __importDefault(__nccwpck_require__(1383));
 const promises_1 = __importDefault(__nccwpck_require__(3977));
 const node_path_1 = __importDefault(__nccwpck_require__(9411));
+const node_os_1 = __nccwpck_require__(612);
 const getLastMergedPullRequest = (octokit, owner, repo) => __awaiter(void 0, void 0, void 0, function* () {
     const { data: pullRequests } = yield octokit.rest.pulls.list({
         owner,
@@ -13752,8 +13753,8 @@ const run = (githubToken, wsdir, persist, build, increment, prereleaseId, increm
             const [component, version] = c.split("@");
             content += `${component}: ${version}\n`;
         });
-        yield promises_1.default.writeFile(node_path_1.default.join(wsdir, 'versions.txt'), content);
-        mergeArgs.push("--versions-file", "versions.txt");
+        yield promises_1.default.writeFile(node_path_1.default.join((0, node_os_1.tmpdir)(), 'versions.txt'), content);
+        mergeArgs.push("--versions-file", node_path_1.default.relative(wsdir, node_path_1.default.join((0, node_os_1.tmpdir)(), 'versions.txt')));
     }
     yield (0, exec_1.exec)("bit", mergeArgs, {
         cwd: wsdir,
@@ -13842,6 +13843,14 @@ module.exports = require("net");
 
 "use strict";
 module.exports = require("node:fs/promises");
+
+/***/ }),
+
+/***/ 612:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:os");
 
 /***/ }),
 
