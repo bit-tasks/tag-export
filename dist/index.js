@@ -13642,6 +13642,8 @@ const exec_1 = __nccwpck_require__(1514);
 const github_1 = __nccwpck_require__(5438);
 const core = __importStar(__nccwpck_require__(2186));
 const semver_1 = __importDefault(__nccwpck_require__(1383));
+const promises_1 = __importDefault(__nccwpck_require__(3977));
+const node_path_1 = __importDefault(__nccwpck_require__(9411));
 const getLastMergedPullRequest = (octokit, owner, repo) => __awaiter(void 0, void 0, void 0, function* () {
     const { data: pullRequests } = yield octokit.rest.pulls.list({
         owner,
@@ -13675,12 +13677,26 @@ function getVersionFromLabel(labels) {
 function getVersionFromPRTitle(title) {
     return title ? getVersionKeyword(title) : null;
 }
+/**
+ * @description Return an array of "componentId@<version>" without extra quotes.
+ */
+function getOverridenVersions(labels) {
+    if (!labels)
+        return [];
+    const versionPattern = /@(major|minor|patch)$/;
+    return labels
+        .filter((label) => versionPattern.test(label.name))
+        .map((label) => {
+        const version = label.name.split("@").pop(); // get major / minor / patch
+        return `${label.description}@${version}`; // No extra quotes here
+    });
+}
 const run = (githubToken, wsdir, persist, build, increment, prereleaseId, incrementBy, strict) => __awaiter(void 0, void 0, void 0, function* () {
     const version = yield (0, exec_1.getExecOutput)("bit -v", [], { cwd: wsdir });
-    // If the version is lower than 1.11.42, throw an error recommending to downgrade the action version to v2
-    // or upgrade Bit to ^1.11.42
-    if (semver_1.default.lt(version.stdout.trim(), "1.11.42")) {
-        throw new Error("Bit version is lower than 1.11.42. Please downgrade the action version to v2, or upgrade Bit to ^1.11.42");
+    // If the version is lower than 1.12.45, throw an error recommending to downgrade the action version to v2
+    // or upgrade Bit to ^1.12.45
+    if (semver_1.default.lt(version.stdout.trim(), "1.12.45")) {
+        throw new Error("Bit version is lower than 1.12.45. Please downgrade the action version to v2, or upgrade Bit to ^1.12.45");
     }
     const { repo, owner } = github_1.context === null || github_1.context === void 0 ? void 0 : github_1.context.repo;
     const octokit = (0, github_1.getOctokit)(githubToken);
@@ -13725,6 +13741,19 @@ const run = (githubToken, wsdir, persist, build, increment, prereleaseId, increm
     }
     if (persist) {
         mergeArgs.push("--persist");
+    }
+    // Get overridden versions as an array
+    const overridenComponentVersions = getOverridenVersions(lastMergedPR === null || lastMergedPR === void 0 ? void 0 : lastMergedPR.labels);
+    core.info("Overriden labels: " + overridenComponentVersions.join(", "));
+    // Generate versions.txt file
+    if (overridenComponentVersions.length > 0) {
+        let content = '';
+        overridenComponentVersions.forEach((c) => {
+            const [component, version] = c.split("@");
+            content += `${component}: ${version}\n`;
+        });
+        yield promises_1.default.writeFile(node_path_1.default.join(wsdir, 'versions.txt'), content);
+        mergeArgs.push("--versions-file", "versions.txt");
     }
     yield (0, exec_1.exec)("bit", mergeArgs, {
         cwd: wsdir,
@@ -13805,6 +13834,22 @@ module.exports = require("https");
 
 "use strict";
 module.exports = require("net");
+
+/***/ }),
+
+/***/ 3977:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:fs/promises");
+
+/***/ }),
+
+/***/ 9411:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:path");
 
 /***/ }),
 

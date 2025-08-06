@@ -2,6 +2,8 @@ import { exec, getExecOutput } from "@actions/exec";
 import { context, getOctokit } from "@actions/github";
 import * as core from "@actions/core";
 import semver from "semver";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 const getLastMergedPullRequest = async (
   octokit: any,
@@ -57,14 +59,29 @@ function getVersionFromPRTitle(title?: string): string | null {
   return title ? getVersionKeyword(title) : null;
 }
 
+/**
+ * @description Return an array of "componentId@<version>" without extra quotes.
+ */
+function getOverridenVersions(labels?: any[]): string[] {
+  if (!labels) return [];
+  const versionPattern = /@(major|minor|patch)$/;
+
+  return labels
+    .filter((label: { name: string }) => versionPattern.test(label.name))
+    .map((label: { name: string; description: string }) => {
+      const version = label.name.split("@").pop(); // get major / minor / patch
+      return `${label.description}@${version}`; // No extra quotes here
+    });
+}
+
 const run = async (githubToken: string, wsdir: string, persist: boolean, build: boolean, increment: string, prereleaseId: string, incrementBy: number, strict: boolean) => {
   const version = await getExecOutput("bit -v", [], { cwd: wsdir });
 
-  // If the version is lower than 1.11.42, throw an error recommending to downgrade the action version to v2
-  // or upgrade Bit to ^1.11.42
-  if (semver.lt(version.stdout.trim(), "1.11.42")) {
+  // If the version is lower than 1.12.45, throw an error recommending to downgrade the action version to v2
+  // or upgrade Bit to ^1.12.45
+  if (semver.lt(version.stdout.trim(), "1.12.45")) {
     throw new Error(
-      "Bit version is lower than 1.11.42. Please downgrade the action version to v2, or upgrade Bit to ^1.11.42"
+      "Bit version is lower than 1.12.45. Please downgrade the action version to v2, or upgrade Bit to ^1.12.45"
     );
   }
 
@@ -120,6 +137,23 @@ const run = async (githubToken: string, wsdir: string, persist: boolean, build: 
 
   if (persist) {
     mergeArgs.push("--persist");
+  }
+
+  // Get overridden versions as an array
+  const overridenComponentVersions = getOverridenVersions(lastMergedPR?.labels);
+  core.info("Overriden labels: " + overridenComponentVersions.join(", "));
+
+  // Generate versions.txt file
+  if (overridenComponentVersions.length > 0) {
+    let content = '';
+    overridenComponentVersions.forEach((c) => {
+      const [component, version] = c.split("@");
+      content += `${component}: ${version}\n`;
+    });
+
+    await fs.writeFile(path.join(wsdir, 'versions.txt'), content);
+
+    mergeArgs.push("--versions-file", "versions.txt");
   }
 
   await exec("bit", mergeArgs, {
