@@ -13748,7 +13748,7 @@ const run = (githubToken, wsdir, persist, build, increment, prereleaseId, increm
     core.info("Overriden labels: " + overridenComponentVersions.join(", "));
     // Generate versions.txt file
     if (overridenComponentVersions.length > 0) {
-        let content = '';
+        let content = 'DEFAULT: patch\n';
         overridenComponentVersions.forEach((c) => {
             const [component, version] = c.split("@");
             content += `${component}: ${version}\n`;

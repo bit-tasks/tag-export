@@ -146,7 +146,7 @@ const run = async (githubToken: string, wsdir: string, persist: boolean, build: 
 
   // Generate versions.txt file
   if (overridenComponentVersions.length > 0) {
-    let content = '';
+    let content = 'DEFAULT: patch\n';
     overridenComponentVersions.forEach((c) => {
       const [component, version] = c.split("@");
       content += `${component}: ${version}\n`;
