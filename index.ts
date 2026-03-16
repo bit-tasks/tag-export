@@ -9,12 +9,13 @@ try {
   const prereleaseId: string = core.getInput("prerelease-id");
   const incrementBy: number = parseInt(core.getInput("increment-by"));
   const strict: boolean = core.getInput("strict") === "true" ? true : false;
+  const skipPush: boolean = core.getInput("skip-push") === "true" ? true : false;
 
   if (!githubToken) {
     throw new Error("GitHub token not found");
   }
 
-  run(githubToken, wsDir, build, increment, prereleaseId, incrementBy, strict);
+  run(githubToken, wsDir, build, increment, prereleaseId, incrementBy, strict, skipPush);
 } catch (error) {
   core.setFailed((error as Error).message);
 }

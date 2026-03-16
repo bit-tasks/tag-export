@@ -30,6 +30,9 @@ inputs:
   increment-by:
     description: "Increment by"
     required: false
+  skip-push:
+    description: 'Skip pushing the changes to the remote repository (useful when CI handles the push separately)'
+    required: false
 runs:
   using: 'node20'
   main: 'dist/index.js'
